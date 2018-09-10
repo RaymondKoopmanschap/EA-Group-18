@@ -47,7 +47,7 @@ public class player18 implements ContestSubmission {
     public void run() {
         // Run your algorithm here
         A bla = new A();
-        System.out.println("Random print to prove it works");
+        System.out.println("Random print to prove it works!!");
         int evals = 0;
         // init population
         // calculate fitness
