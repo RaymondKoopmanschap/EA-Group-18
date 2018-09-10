@@ -47,6 +47,7 @@ public class player18 implements ContestSubmission {
     public void run() {
         // Run your algorithm here
         A bla = new A();
+        System.out.println("Random print");
         int evals = 0;
         // init population
         // calculate fitness
@@ -62,6 +63,8 @@ public class player18 implements ContestSubmission {
 
     }
 }
+
 class A {
     public int x;
+
 }
