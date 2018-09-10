@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="submission:jar">
+    <output-path>$PROJECT_DIR$/classes/artifacts/submission_jar</output-path>
+    <root id="root">
+      <element id="archive" name="submission.jar">
+        <element id="module-output" name="EA-Group-18" />
+      </element>
+      <element id="library" level="module" name="Maven: org.vu.contest:contest:1.0" module-name="EA-Group-18" />
+    </root>
+  </artifact>
+</component>
