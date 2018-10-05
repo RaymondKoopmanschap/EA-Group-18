@@ -16,28 +16,31 @@ def main(schaffers=False, katsuura=False):
         # bentcigar parameters
         parameters_dict = OrderedDict([
             ('ISLANDS_NUMBER', np.linspace(1, 1000, 1, dtype='int')),
-            ('POPULATION_SIZE', np.linspace(300, 1000, 1, dtype='int')),
+            ('POPULATION_SIZE', np.linspace(100, 1000, 1, dtype='int')),
             ('CHILDREN_SIZE', np.linspace(10, 100, 1, dtype='int')),
-            ('PARENTS_SIZE', np.linspace(0.7, 0.8, 1, )),
+            ('PARENTS_SIZE', np.linspace(70, 100, 1, dtype='int')),
             ('ARITHMETIC_XOVER_N_PARENTS', np.linspace(2, 8, 1, dtype='int')),
-            ('MUTATION_PROBABILITY', np.linspace(0.55333, 0.56, 1)),
-            ('N_SURVIVORS', np.linspace(100, 100, 1, dtype='int')),
-            ('TOURNAMENT_SIZE', np.linspace(3, 10, 1, dtype='int')),
+            ('MUTATION_PROBABILITY', np.linspace(0.113333, 0.56, 1)),
+            ('RECOMB_PROBABILITY', np.linspace(0.9333333, 0.86, 1)),
+            ('N_SURVIVORS', np.linspace(30, 100, 1, dtype='int')),
+            ('TOURNAMENT_SIZE', np.linspace(2, 10, 1, dtype='int')),
             ('ARITHMETIC_RECOMB_ALPHA', np.linspace(0.11, 0.42, 1)),
-            ('MUTATION_A', np.linspace(2.388888, 2.5, 1)),
+            ('MUTATION_A', np.linspace(2.3888, 2.5, 1)),
             ('MUTATION_B', np.linspace(2.1666, 2.5, 1)),
             ('MUTATION_EPSILON', np.linspace(5.52773266332e-06, 5.52773266332e-06, 1)),
             ('MIGRATION_AFTER_EPOCHS', np.linspace(150, 150, 1, dtype='int')),
-            ('ELITISM_TO_KEEP', np.linspace(0, 0, 1, dtype='int'))
+            ('ELITISM_TO_KEEP', np.linspace(4, 0, 1, dtype='int')),
+            ('BLEND_CROSSOVER_ALPHA', np.linspace(0.5, 0.6, 1)),
         ])
-    elif katsuura:
+    elif katsuura or schaffers:
         parameters_dict = OrderedDict([
             ('ISLANDS_NUMBER', np.linspace(10, 20, 1, dtype='int')),
             ('POPULATION_SIZE', np.linspace(100, 200, 5, dtype='int')),
-            ('CHILDREN_SIZE', np.linspace(10, 100, 1, dtype='int')),
-            ('PARENTS_SIZE', np.linspace(0.1, 0.8, 1, )),
+            ('CHILDREN_SIZE', np.linspace(2, 100, 1, dtype='int')),
+            ('PARENTS_SIZE', np.linspace(100, 100, 1, dtype='int')),
             ('ARITHMETIC_XOVER_N_PARENTS', np.linspace(2, 8, 1, dtype='int')),
             ('MUTATION_PROBABILITY', np.linspace(0.33, 0.56, 1)),
+            ('RECOMB_PROBABILITY', np.linspace(0.853333, 0.86, 1)),
             ('N_SURVIVORS', np.linspace(100, 100, 1, dtype='int')),
             ('TOURNAMENT_SIZE', np.linspace(3, 10, 1, dtype='int')),
             ('ARITHMETIC_RECOMB_ALPHA', np.linspace(0.11, 0.42, 1)),
@@ -45,7 +48,8 @@ def main(schaffers=False, katsuura=False):
             ('MUTATION_B', np.linspace(2.1666, 2.5, 1)),
             ('MUTATION_EPSILON', np.linspace(5.52773266332e-06, 5.52773266332e-06, 1)),
             ('MIGRATION_AFTER_EPOCHS', np.linspace(10, 150, 10, dtype='int')),
-            ('ELITISM_TO_KEEP', np.linspace(10, 20, 6, dtype='int'))
+            ('ELITISM_TO_KEEP', np.linspace(10, 20, 6, dtype='int')),
+            ('BLEND_CROSSOVER_ALPHA', np.linspace(0.5, 0.5, 1)),
         ])
 
     with open('results.csv', 'w') as outfile:
@@ -54,28 +58,30 @@ def main(schaffers=False, katsuura=False):
         spamwriter = csv.writer(outfile, delimiter=';')
         spamwriter.writerow(fieldnames)
 
-    for ELITISM_TO_KEEP in parameters_dict['ELITISM_TO_KEEP']:
-        for MIGRATION_AFTER_EPOCHS in parameters_dict['MIGRATION_AFTER_EPOCHS']:
-            for ISLANDS_NUMBER in parameters_dict['ISLANDS_NUMBER']:
-                for MUTATION_EPSILON in parameters_dict['MUTATION_EPSILON']:
-                    for MUTATION_A in parameters_dict['MUTATION_A']:
-                        for MUTATION_B in parameters_dict['MUTATION_B']:
-                            for ARITHMETIC_RECOMB_ALPHA in parameters_dict['ARITHMETIC_RECOMB_ALPHA']:
-                                for TOURNAMENT_SIZE in parameters_dict['TOURNAMENT_SIZE']:
-                                    for PARENTS_SIZE in parameters_dict['PARENTS_SIZE']:
-                                        for CHILDREN_SIZE in parameters_dict['CHILDREN_SIZE']:
-                                            for POPULATION_SIZE in parameters_dict['POPULATION_SIZE']:
-                                                for ARITHMETIC_XOVER_N_PARENTS in parameters_dict['ARITHMETIC_XOVER_N_PARENTS']:
-                                                    for MUTATION_PROBABILITY in parameters_dict['MUTATION_PROBABILITY']:
-                                                        for N_SURVIVORS in parameters_dict['N_SURVIVORS']:
-                                                            parameters = OrderedDict()
-                                                        for key in parameters_dict.keys():
-                                                            parameters[key] = locals()[key]
-                                                            if N_SURVIVORS > POPULATION_SIZE:
-                                                                continue
-                                                        edit_java_file(parameters)
-                                                        compile_and_run_5_times(
-                                                            parameters, schaffers=schaffers, katsuura=katsuura)
+    for RECOMB_PROBABILITY in parameters_dict['RECOMB_PROBABILITY']:
+        for BLEND_CROSSOVER_ALPHA in parameters_dict['BLEND_CROSSOVER_ALPHA']:
+            for ELITISM_TO_KEEP in parameters_dict['ELITISM_TO_KEEP']:
+                for MIGRATION_AFTER_EPOCHS in parameters_dict['MIGRATION_AFTER_EPOCHS']:
+                    for ISLANDS_NUMBER in parameters_dict['ISLANDS_NUMBER']:
+                        for MUTATION_EPSILON in parameters_dict['MUTATION_EPSILON']:
+                            for MUTATION_A in parameters_dict['MUTATION_A']:
+                                for MUTATION_B in parameters_dict['MUTATION_B']:
+                                    for ARITHMETIC_RECOMB_ALPHA in parameters_dict['ARITHMETIC_RECOMB_ALPHA']:
+                                        for TOURNAMENT_SIZE in parameters_dict['TOURNAMENT_SIZE']:
+                                            for PARENTS_SIZE in parameters_dict['PARENTS_SIZE']:
+                                                for CHILDREN_SIZE in parameters_dict['CHILDREN_SIZE']:
+                                                    for POPULATION_SIZE in parameters_dict['POPULATION_SIZE']:
+                                                        for ARITHMETIC_XOVER_N_PARENTS in parameters_dict['ARITHMETIC_XOVER_N_PARENTS']:
+                                                            for MUTATION_PROBABILITY in parameters_dict['MUTATION_PROBABILITY']:
+                                                                for N_SURVIVORS in parameters_dict['N_SURVIVORS']:
+                                                                    parameters = OrderedDict()
+                                                                for key in parameters_dict.keys():
+                                                                    parameters[key] = locals()[key]
+                                                                    if N_SURVIVORS > POPULATION_SIZE:
+                                                                        continue
+                                                                edit_java_file(parameters)
+                                                                compile_and_run_5_times(
+                                                                    parameters, schaffers=schaffers, katsuura=katsuura)
 
 
 def edit_java_file(parameters):
@@ -95,11 +101,12 @@ def compile_and_run_5_times(parameters, schaffers=False, katsuura=False):
     elif katsuura:
         function = 'KatsuuraEvaluation'
     for i in range(3):
-        ret = subprocess.check_output('javac -cp contest.jar player18.java Individual.java Island.java && jar cmf MainClass.txt submission.jar *class && java -jar testrun.jar -submission=player18 -evaluation={} -seed={}'.format(function, i), shell=True)
+        ret = subprocess.check_output('javac -cp contest.jar player18.java ComputedGenotype.java Individual.java Island.java && jar cmf MainClass.txt submission.jar *class && java -jar testrun.jar -submission=player18 -evaluation={} -seed={}'.format(function, i), shell=True)
 
         score = str(ret).split('Score: ')[1].split('\\n')[0]
         score = float(score)
         scores.append(score)
+        print(score)
         if 'halt' in str(ret) and score < 1.0:
             exceptioned = True
             break
