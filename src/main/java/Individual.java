@@ -3,6 +3,8 @@ import java.util.Arrays;
 import java.util.*;
 import java.lang.Math;
 import org.vu.contest.ContestEvaluation;
+import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
+//import apache.commons.math3.distribution.*;
 
 
 public class Individual {
@@ -21,7 +23,7 @@ public class Individual {
     Double delta;
 
     List<Double> n_deltas;
-    List<Double> n_alphas;
+    double[] n_alphas;
     double[][] covMatrix;
 
     @Override
@@ -49,12 +51,6 @@ public class Individual {
         this.n_deltas = new ArrayList<Double>(10);
         for (int i = 0; i < 10; i++) {
             this.n_deltas.add(rnd.nextGaussian());
-        }
-
-        int nAlpha = 10 * (10 - 1) / 2;
-        this.n_alphas = new ArrayList<Double>(nAlpha);
-        for (int i = 0; i < nAlpha; i++) {
-            this.n_alphas.add(0.0);
         }
     }
 
@@ -163,54 +159,57 @@ public class Individual {
     }
 
     public void CorrelatedMutation(double epsilon, double first_arg, double second_arg) {
-        double tau = 1  / (Math.sqrt(first_arg * Math.sqrt(POPULATION_SIZE)));
-        double tau_prime = 1 / (Math.sqrt(second_arg * POPULATION_SIZE));
-        double beta = 5;
-
         int dimensions = 10;
+        double tau =  1  / (Math.sqrt(first_arg * Math.sqrt(dimensions)));
+        double tau_prime =  1 / (Math.sqrt(second_arg * dimensions));
 
-        // calculate tau multiplied by a normal distribution sample
+        double beta = 0.087; // 5 degrees
+
+        int nAlpha = dimensions * (dimensions - 1) / 2;
         double tau_gauss = tau_prime * rnd.nextGaussian();
 
-        // covariance matrix
-        this.covMatrix = new double[dimensions][dimensions];
-
-        // change in x to be added (sampled from the multivariate normal dist)
+        this.n_alphas = new double[nAlpha];
         double[] dx = new double[dimensions];
+        this.covMatrix = new double[dimensions][dimensions];
 
         // mutate sigmas
         for (int i = 0; i < dimensions; i++) {
-            this.n_deltas.set(i, Math.max(epsilon, this.n_deltas.get(i) * Math.exp(
-                    tau_gauss + tau * rnd.nextGaussian())));
-        }
-
-        int nAlpha = dimensions * (dimensions - 1) / 2;
-        for (int i = 0; i < nAlpha; i++) {
-            this.n_alphas.set(i, 0.0);
+            this.n_deltas.set(i, this.n_deltas.get(i) * Math.exp(tau_gauss + tau * rnd.nextGaussian()));
+            System.out.println(n_deltas.get(i));
         }
 
         // mutate alphas
         for (int j = 0; j < nAlpha; j++) {
-            this.n_alphas.set(j, this.n_alphas.get(j) + beta * rnd.nextGaussian());
-            if (Math.abs(this.n_alphas.get(j)) > Math.PI) {
-                this.n_alphas.set(j, this.n_alphas.get(j) - 2 * Math.PI * Math.signum(this.n_alphas.get(j)));
+            this.n_alphas[j] += beta * rnd.nextGaussian();
+            if (Math.abs(this.n_alphas[j]) > Math.PI) {
+                this.n_alphas[j] -= 2 * Math.PI * Math.signum(this.n_alphas[j]);
             }
         }
+        //System.out.println(n_alphas[0]);
 
         // calculate covariance matrix
         calculateCovarianceMatrix(dimensions);
 
-        double[] means = new double[dimensions];
-        for (int i = 0; i < dimensions; i++) {
-            means[i] = 0;
-        }
+        double [] means = new double[dimensions];
+
         // get the samples from the multivariate normal distribution
-        dx = multivariateNormalDistribution(dimensions, rnd)[0];
+        //System.out.println(Arrays.toString(n_alphas));
+        System.out.println("aaaa");
+        for (int i = 0; i < 10; i++) {
+            //System.out.println(Arrays.toString(this.covMatrix[i]));
+            for (int j = 0; j < 10; j++) {
+                System.out.printf( "   " +  "%+.2f", this.covMatrix[i][j]);
+            }
+            System.out.println();
+        }
+        dx = new MultivariateNormalDistribution(means, covMatrix).sample(); // -> apache/commons/math/probability
+        
+        //dx = multivariateNormalDistribution(dimensions, rnd)[0];
 
         // mutate the genotype
         for (int i = 0; i < this.genotype.size(); i++) {
-            this.genotype.set(i, this.genotype.get(i) + dx[i]);
-            this.genotype.set(i, keepInRange(this.genotype.get(i)));
+            this.genotype.set(i, keepInRange(this.genotype.get(i) + dx[i]));
+            System.out.println(dx[i]);
         }
     }
 
@@ -245,7 +244,7 @@ public class Individual {
             for (int j = i + 1; j < dimensions; j++) {
                 this.covMatrix[i][j] = 0.5 * (Math.pow(this.n_deltas.get(i), 2) -
                         Math.pow(this.n_deltas.get(j), 2)) * Math.tan(
-                                2 * this.n_alphas.get(alphaIndex));
+                                2 * this.n_alphas[alphaIndex]);
             }
             alphaIndex++;
         }
