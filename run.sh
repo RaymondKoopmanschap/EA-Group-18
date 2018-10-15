@@ -1,0 +1,1 @@
+javac -cp contest.jar:commons-math3-3.6.1.jar player18.java ComputedGenotype.java Island.java Individual.java Matrix.java CholeskyDecomposition.java  && jar cmf MainClass.txt submission.jar player18.class Individual.class player18\$1.class *class org/  && java -jar testrun.jar -submission=player18 -evaluation=KatsuuraEvaluation -seed=3
