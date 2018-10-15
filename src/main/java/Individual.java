@@ -22,6 +22,7 @@ public class Individual {
 
     List<Double> n_deltas;
     List<Double> n_alphas;
+    double[][] covMatrix;
 
     @Override
     public String toString() {
@@ -49,14 +50,20 @@ public class Individual {
         for (int i = 0; i < 10; i++) {
             this.n_deltas.add(rnd.nextGaussian());
         }
+
+        int nAlpha = 10 * (10 - 1) / 2;
+        this.n_alphas = new ArrayList<Double>(nAlpha);
+        for (int i = 0; i < nAlpha; i++) {
+            this.n_alphas.add(0.0);
+        }
     }
 
     public Individual(Random rnd, ContestEvaluation evaluation) {
         // best for bentcigar
         /*
         this(rnd, evaluation, Arrays.asList(
-                    -1.1481615452524466, 4.002046649371003, -0.43178744966559485, -3.4897643863689924, 0.44376272902370223, -1.8086296469778993, 1.1882329735675545, -0.7882132938335314, 1.5181745335044008, -0.42285650091772453
-                    //-1.1481615452524465, 4.491617537557367, -0.43178744966559485, -3.12080777515226, 0.44376272902370223, -1.8086296469778993, 1.1882329735675545, -0.7882132938335314, 1.368928057796371, -0.42285650091772453
+                    //@9.999996891249292
+                    //-1.0637434667691323, 4.002247195181288, -0.2222551655214499, -3.602248046618781, 0.11243458597276558, -1.9207687480867317, 1.2555547243618332, -0.7723689151136095, 1.3714606952113435, -0.38436238638777276
                     ));
                     */
         this(rnd, evaluation, new ArrayList<Double>(10));
@@ -153,6 +160,102 @@ public class Individual {
         this.n_deltas.set(randomAllele,new_delta);
 
         this.genotype.set(randomAllele, this.genotype.get(randomAllele) + this.n_deltas.get(randomAllele) * rnd.nextGaussian());
+    }
+
+    public void CorrelatedMutation(double epsilon, double first_arg, double second_arg) {
+        double tau = 1  / (Math.sqrt(first_arg * Math.sqrt(POPULATION_SIZE)));
+        double tau_prime = 1 / (Math.sqrt(second_arg * POPULATION_SIZE));
+        double beta = 5;
+
+        int dimensions = 10;
+
+        // calculate tau multiplied by a normal distribution sample
+        double tau_gauss = tau_prime * rnd.nextGaussian();
+
+        // covariance matrix
+        this.covMatrix = new double[dimensions][dimensions];
+
+        // change in x to be added (sampled from the multivariate normal dist)
+        double[] dx = new double[dimensions];
+
+        // mutate sigmas
+        for (int i = 0; i < dimensions; i++) {
+            this.n_deltas.set(i, Math.max(epsilon, this.n_deltas.get(i) * Math.exp(
+                    tau_gauss + tau * rnd.nextGaussian())));
+        }
+
+        int nAlpha = dimensions * (dimensions - 1) / 2;
+        for (int i = 0; i < nAlpha; i++) {
+            this.n_alphas.set(i, 0.0);
+        }
+
+        // mutate alphas
+        for (int j = 0; j < nAlpha; j++) {
+            this.n_alphas.set(j, this.n_alphas.get(j) + beta * rnd.nextGaussian());
+            if (Math.abs(this.n_alphas.get(j)) > Math.PI) {
+                this.n_alphas.set(j, this.n_alphas.get(j) - 2 * Math.PI * Math.signum(this.n_alphas.get(j)));
+            }
+        }
+
+        // calculate covariance matrix
+        calculateCovarianceMatrix(dimensions);
+
+        double[] means = new double[dimensions];
+        for (int i = 0; i < dimensions; i++) {
+            means[i] = 0;
+        }
+        // get the samples from the multivariate normal distribution
+        dx = multivariateNormalDistribution(dimensions, rnd)[0];
+
+        // mutate the genotype
+        for (int i = 0; i < this.genotype.size(); i++) {
+            this.genotype.set(i, this.genotype.get(i) + dx[i]);
+            this.genotype.set(i, keepInRange(this.genotype.get(i)));
+        }
+    }
+
+    private double keepInRange(double val) {
+        return Math.min(5.0, Math.max(
+                -5.0, val));
+    }
+
+    private double[][] multivariateNormalDistribution(int n, Random rnd_) {
+        // covariance matrix
+        Matrix covMatrix = new Matrix(this.covMatrix);
+        // generate the L from the Cholesky Decomposition
+        Matrix L = covMatrix.chol().getL();
+
+        // draw samples from the normal gaussian
+        double[] normSamples = new double[n];
+        for (int i = 0; i < n; i++) {
+            normSamples[i] = rnd_.nextGaussian();
+        }
+
+        // construct Matrix
+        Matrix z = new Matrix(normSamples, 1);
+        return L.times(z.transpose()).transpose().getArray();
+    }
+
+    private void calculateCovarianceMatrix(int dimensions) {
+        // index used to traverse the alphas array
+        int alphaIndex = 0;
+        // calculate values on the diagonal and above it
+        for (int i = 0; i < dimensions; i++) {
+            this.covMatrix[i][i] = Math.pow(this.n_deltas.get(i), 2);
+            for (int j = i + 1; j < dimensions; j++) {
+                this.covMatrix[i][j] = 0.5 * (Math.pow(this.n_deltas.get(i), 2) -
+                        Math.pow(this.n_deltas.get(j), 2)) * Math.tan(
+                                2 * this.n_alphas.get(alphaIndex));
+            }
+            alphaIndex++;
+        }
+
+        // calculate values under the diagonal
+        for (int i = 0; i < dimensions; i++) {
+            for (int j = 0; j < i; j++) {
+                this.covMatrix[i][j] = this.covMatrix[j][i];
+            }
+        }
     }
 
     /*
