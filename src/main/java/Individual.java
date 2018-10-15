@@ -52,6 +52,9 @@ public class Individual {
         for (int i = 0; i < 10; i++) {
             this.n_deltas.add(rnd.nextGaussian());
         }
+        int dimensions = 10;
+        int nAlpha = dimensions * (dimensions - 1) / 2;
+        this.n_alphas = new double[nAlpha];
     }
 
     public Individual(Random rnd, ContestEvaluation evaluation) {
@@ -165,26 +168,28 @@ public class Individual {
 
         double beta = 0.087; // 5 degrees
 
-        int nAlpha = dimensions * (dimensions - 1) / 2;
         double tau_gauss = tau_prime * rnd.nextGaussian();
 
-        this.n_alphas = new double[nAlpha];
         double[] dx = new double[dimensions];
         this.covMatrix = new double[dimensions][dimensions];
 
         // mutate sigmas
         for (int i = 0; i < dimensions; i++) {
-            this.n_deltas.set(i, this.n_deltas.get(i) * Math.exp(tau_gauss + tau * rnd.nextGaussian()));
-            System.out.println(n_deltas.get(i));
+            this.n_deltas.set(i, Math.max(0.00001, this.n_deltas.get(i) * Math.exp(tau_gauss + tau * rnd.nextGaussian())));
+            //System.out.println(n_deltas.get(i));
         }
 
+        int nAlpha = dimensions * (dimensions - 1) / 2;
         // mutate alphas
         for (int j = 0; j < nAlpha; j++) {
             this.n_alphas[j] += beta * rnd.nextGaussian();
+            /*
             if (Math.abs(this.n_alphas[j]) > Math.PI) {
                 this.n_alphas[j] -= 2 * Math.PI * Math.signum(this.n_alphas[j]);
             }
+            */
         }
+        System.out.println(Arrays.toString(n_alphas) + " <- alphas");
         //System.out.println(n_alphas[0]);
 
         // calculate covariance matrix
@@ -194,13 +199,14 @@ public class Individual {
 
         // get the samples from the multivariate normal distribution
         //System.out.println(Arrays.toString(n_alphas));
-        System.out.println("aaaa");
+        //
+        //System.out.println("aaaa");
         for (int i = 0; i < 10; i++) {
             //System.out.println(Arrays.toString(this.covMatrix[i]));
             for (int j = 0; j < 10; j++) {
-                System.out.printf( "   " +  "%+.2f", this.covMatrix[i][j]);
+                //System.out.printf( "   " +  "%+.2f", this.covMatrix[i][j]);
             }
-            System.out.println();
+            //System.out.println();
         }
         dx = new MultivariateNormalDistribution(means, covMatrix).sample(); // -> apache/commons/math/probability
         
@@ -209,7 +215,7 @@ public class Individual {
         // mutate the genotype
         for (int i = 0; i < this.genotype.size(); i++) {
             this.genotype.set(i, keepInRange(this.genotype.get(i) + dx[i]));
-            System.out.println(dx[i]);
+            //System.out.println(dx[i]);
         }
     }
 
