@@ -7,7 +7,7 @@ public class Matrix implements Cloneable, java.io.Serializable {
     /** Array for internal storage of elements.
      @serial internal array storage.
      */
-    private double[][] A;
+    public double[][] A;
 
     /** Row and column dimensions.
      @serial row dimension column dimension.
