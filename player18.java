@@ -137,8 +137,8 @@ public class player18 implements ContestSubmission {
                 for (int i = 0; i < children.size(); i ++) {
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll < MUTATION_PROBABILITY) {
-                        //children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
-                        children.get(i).CorrelatedMutation(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        //children.get(i).CorrelatedMutation(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                 }
                 setFitnesses(children);

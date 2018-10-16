@@ -50,7 +50,7 @@ public class Individual {
         this.delta = rnd.nextGaussian();
         this.n_deltas = new ArrayList<Double>(10);
         for (int i = 0; i < 10; i++) {
-            this.n_deltas.add(Math.exp(rnd.nextGaussian()));
+            this.n_deltas.add(1.0);
         }
         int dimensions = 10;
         int nAlpha = dimensions * (dimensions - 1) / 2;
@@ -196,7 +196,7 @@ public class Individual {
             }
         }
         //System.out.println(Arrays.toString(n_alphas) + " <- alphas");
-        System.out.println(this.n_deltas + " <- sigmas");
+        //System.out.println(this.n_deltas + " <- sigmas");
         //System.out.println(n_alphas[0]);
 
         // calculate covariance matrix
