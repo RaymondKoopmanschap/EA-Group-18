@@ -142,6 +142,7 @@ public class Individual {
     }
 
     public void UncorrelatedMutationOneStepSize() {
+        this.fitness = null;
         double epsilon = 0.00000001;
         double tau = 1 / Math.sqrt(POPULATION_SIZE);
 
@@ -155,6 +156,7 @@ public class Individual {
     }
 
     public void UncorrelatedMutationNStepSizes(double epsilon, double first_arg, double second_arg) {
+        this.fitness = null;
         double tau = 1  / (Math.sqrt(first_arg * Math.sqrt(POPULATION_SIZE)));
         double tau_prime = 1 / (Math.sqrt(second_arg * POPULATION_SIZE));
 
@@ -173,6 +175,7 @@ public class Individual {
     }
 
     public void UncorrelatedMutationNStepSizesMutateAll(double epsilon, double first_arg, double second_arg) {
+        this.fitness = null;
         double tau = 1  / (Math.sqrt(first_arg * Math.sqrt(POPULATION_SIZE)));
         double tau_prime = 1 / (Math.sqrt(second_arg * POPULATION_SIZE));
 
@@ -189,6 +192,7 @@ public class Individual {
     }
 
     public void CorrelatedMutation(double epsilon, double first_arg, double second_arg) {
+        this.fitness = null;
         int dimensions = 10;
         double tau =  1  / (Math.sqrt(first_arg * Math.sqrt(dimensions)));
         double tau_prime =  1 / (Math.sqrt(second_arg * dimensions));
@@ -239,6 +243,7 @@ public class Individual {
         */
     }
     public void CorrelatedMutation2(double epsilon, double first_arg, double second_arg) {
+        this.fitness = null;
         //Benjamin mutation do not use
         int dimensions = 10;
         double tau =  1  / (Math.sqrt(first_arg * Math.sqrt(dimensions)));
