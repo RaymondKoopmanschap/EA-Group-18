@@ -190,33 +190,18 @@ public class Individual {
         int nAlpha = dimensions * (dimensions - 1) / 2;
         // mutate alphas
         for (int j = 0; j < nAlpha; j++) {
-            this.n_alphas[j] += beta * beta * rnd.nextGaussian() + Math.PI ;
-            this.n_alphas[j] = this.n_alphas[j] % (2 * Math.PI) - Math.PI;
+            this.n_alphas[j] += beta * rnd.nextGaussian();
             if (Math.abs(this.n_alphas[j]) > Math.PI) {
                 this.n_alphas[j] -= 2 * Math.PI * Math.signum(this.n_alphas[j]);
             }
         }
         //System.out.println(Arrays.toString(n_alphas) + " <- alphas");
-        //System.out.println(this.n_deltas + " <- sigmas");
+        System.out.println(this.n_deltas + " <- sigmas");
         //System.out.println(n_alphas[0]);
 
         // calculate covariance matrix
         calculateCovarianceMatrix2(dimensions);
 
-
-        // get the samples from the multivariate normal distribution
-        //System.out.println(Arrays.toString(n_alphas));
-        //
-        //System.out.println("aaaa");
-        /*
-        for (int i = 0; i < 10; i++) {
-            //System.out.println(Arrays.toString(this.covMatrix[i]));
-            for (int j = 0; j < 10; j++) {
-                System.out.printf( "   " +  "%+.4f", this.covMatrix[i][j]);
-            }
-            System.out.println();
-        }
-        */
         double [] means = new double[dimensions];
         dx = new MultivariateNormalDistribution(means, this.covMatrix).sample(); // -> apache/commons/math/probability
         
@@ -341,8 +326,6 @@ public class Individual {
         }
         System.out.println();
         */
-
-
         Matrix covarianceMatrix = rotationalMatrixx.times(deltasMatrix).times(rotationalMatrixx.transpose());
         /*
         System.out.println("ROTATIONAL MATRIX:");
