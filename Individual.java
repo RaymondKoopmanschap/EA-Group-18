@@ -4,6 +4,8 @@ import java.util.*;
 import java.lang.Math;
 import org.vu.contest.ContestEvaluation;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.*;
 //import apache.commons.math3.distribution.*;
 
 
@@ -51,6 +53,7 @@ public class Individual {
         this.n_deltas = new ArrayList<Double>(10);
         for (int i = 0; i < 10; i++) {
             this.n_deltas.add(1.0);
+            //this.n_deltas.add(Math.exp( rnd.nextGaussian()
         }
         int dimensions = 10;
         int nAlpha = dimensions * (dimensions - 1) / 2;
@@ -169,6 +172,22 @@ public class Individual {
         this.genotype.set(randomAllele, this.genotype.get(randomAllele) + this.n_deltas.get(randomAllele) * rnd.nextGaussian());
     }
 
+    public void UncorrelatedMutationNStepSizesMutateAll(double epsilon, double first_arg, double second_arg) {
+        double tau = 1  / (Math.sqrt(first_arg * Math.sqrt(POPULATION_SIZE)));
+        double tau_prime = 1 / (Math.sqrt(second_arg * POPULATION_SIZE));
+
+        int randomAllele = rnd.nextInt((9 - 0) + 1) + 0;
+        for (int i = 0; i < 10; i++) {
+            double new_delta = this.n_deltas.get(i) * Math.exp(tau_prime * rnd.nextGaussian() + 
+                    tau * rnd.nextGaussian());
+            if (new_delta < epsilon) {
+                new_delta = epsilon;
+            }
+            this.n_deltas.set(i,new_delta);
+            this.genotype.set(i, this.genotype.get(i) + this.n_deltas.get(i) * rnd.nextGaussian());
+        }
+    }
+
     public void CorrelatedMutation(double epsilon, double first_arg, double second_arg) {
         int dimensions = 10;
         double tau =  1  / (Math.sqrt(first_arg * Math.sqrt(dimensions)));
@@ -202,14 +221,72 @@ public class Individual {
         // calculate covariance matrix
         calculateCovarianceMatrix2(dimensions);
 
+
         double [] means = new double[dimensions];
         dx = new MultivariateNormalDistribution(means, this.covMatrix).sample(); // -> apache/commons/math/probability
         
         //dx = multivariateNormalDistribution(dimensions, rnd)[0];
 
         // mutate the genotype
+        int randomAllele = rnd.nextInt((9 - 0) + 1) + 0;
+        this.genotype.set(randomAllele, keepInRange(this.genotype.get(randomAllele) + dx[randomAllele]));
+
+        /*
         for (int i = 0; i < this.genotype.size(); i++) {
             this.genotype.set(i, keepInRange(this.genotype.get(i) + dx[i]));
+            //System.out.println(dx[i]);
+        }
+        */
+    }
+    public void CorrelatedMutation2(double epsilon, double first_arg, double second_arg) {
+        //Benjamin mutation do not use
+        int dimensions = 10;
+        double tau =  1  / (Math.sqrt(first_arg * Math.sqrt(dimensions)));
+        double tau_prime =  1 / (Math.sqrt(second_arg * dimensions));
+
+        double beta = 0.0873; // 5 degrees
+
+        double tau_gauss = tau_prime * rnd.nextGaussian();
+
+        this.covMatrix = new double[dimensions][dimensions];
+
+        // mutate sigmas
+        for (int i = 0; i < dimensions; i++) {
+            this.n_deltas.set(i, this.n_deltas.get(i) * Math.exp(tau_gauss + tau * rnd.nextGaussian()));
+            //System.out.println(n_deltas.get(i));
+        }
+
+        int nAlpha = dimensions * (dimensions - 1) / 2;
+        // mutate alphas
+        for (int j = 0; j < nAlpha; j++) {
+            this.n_alphas[j] += beta * rnd.nextGaussian();
+            if (Math.abs(this.n_alphas[j]) > Math.PI) {
+                this.n_alphas[j] -= 2 * Math.PI * Math.signum(this.n_alphas[j]);
+            }
+        }
+        //System.out.println(Arrays.toString(n_alphas) + " <- alphas");
+        //System.out.println(this.n_deltas + " <- sigmas");
+        //System.out.println(n_alphas[0]);
+
+        // calculate covariance matrix
+        //calculateCovarianceMatrix2(dimensions);
+
+        Matrix LMatrix = calculateLMatrix(dimensions);
+
+        double [] means = new double[dimensions];
+        //dx = new MultivariateNormalDistribution(means, this.covMatrix).sample(); // -> apache/commons/math/probability
+        
+        //dx = multivariateNormalDistribution(dimensions, rnd)[0];
+
+        // mutate the genotype
+        int randomAxis = rnd.nextInt((9 - 0) + 1) + 0;
+        double [][] epsilon_vector = new double[10][1];
+        epsilon_vector[randomAxis][0] = rnd.nextGaussian();
+        Matrix epsilonMatrix = new Matrix(epsilon_vector);
+        //this.genotype.set(randomAllele, keepInRange(this.genotype.get(randomAllele) + dx[randomAllele]));
+        Matrix dX = LMatrix.times(epsilonMatrix);
+        for (int i = 0; i < this.genotype.size(); i++) {
+            this.genotype.set(i, keepInRange(this.genotype.get(i) + dX.A[i][0]));
             //System.out.println(dx[i]);
         }
     }
@@ -274,7 +351,7 @@ public class Individual {
         }
         Matrix rotationalMatrixx = new Matrix(rotation_matrix);
 
-        for (int i = 0; i < dimensions; i++) {
+        for (int i = 0; i < dimensions - 1; i++) {
             for (int j = i + 1; j < dimensions; j++) {
                 double [][] new_rotational_matrix = new double[dimensions][dimensions];
                 for (int b = 0; b < dimensions; b++) {
@@ -311,7 +388,7 @@ public class Individual {
         }
         double[][] deltas_matrix = new double[dimensions][dimensions];
         for (int i = 0; i < dimensions; i++) {
-            deltas_matrix[i][i] = this.n_deltas.get(i);
+            deltas_matrix[i][i] = this.n_deltas.get(i) * this.n_deltas.get(i);
             //deltas_matrix[i][i] = 1;
         }
         Matrix deltasMatrix = new Matrix(deltas_matrix);
@@ -352,6 +429,97 @@ public class Individual {
         System.out.println();
         */
     }
+    private Matrix calculateLMatrix(int dimensions) {
+        // index used to traverse the alphas array
+        int alphaIndex = 0;
+        // calculate values on the diagonal and above it
+        double[][] rotation_matrix = new double[dimensions][dimensions];
+        for (int i = 0; i < dimensions; i++) {
+            for (int j = 0; j < dimensions; j++) {
+                if (i==j) {
+                    rotation_matrix[i][j] = 1;
+                } else {
+                    rotation_matrix[i][j] = 0;
+                }
+            }
+        }
+        Matrix rotationalMatrixx = new Matrix(rotation_matrix);
+
+        for (int i = 0; i < dimensions - 1; i++) {
+            for (int j = i + 1; j < dimensions; j++) {
+                double [][] new_rotational_matrix = new double[dimensions][dimensions];
+                for (int b = 0; b < dimensions; b++) {
+                    new_rotational_matrix[b][b] = 1;
+                }
+                new_rotational_matrix[i][i] = Math.cos(this.n_alphas[alphaIndex]);
+                new_rotational_matrix[i][j] = -Math.sin(this.n_alphas[alphaIndex]);
+                new_rotational_matrix[j][i] = Math.sin(this.n_alphas[alphaIndex]);
+                new_rotational_matrix[j][j] = Math.cos(this.n_alphas[alphaIndex]);
+                alphaIndex++;
+                Matrix newRotationalMatrix = new Matrix(new_rotational_matrix);
+                rotationalMatrixx = rotationalMatrixx.times(newRotationalMatrix);
+
+                /*
+                 * USE TO DISPLAY ROTATIONAL MATRICES
+                for (int k = 0; k < 10; k++) {
+                    //System.out.println(Arrays.toString(this.covMatrix[i]));
+                    for (int l = 0; l < 10; l++) {
+                        System.out.printf( "   " +  "%+.4f", rotationalMatrixx.A[k][l]);
+                    }
+                    System.out.println();
+                }
+                System.out.println("NEW MATRIX______________");
+                 */
+                /*
+                */
+            }
+        }
+        double[][] deltas_matrix = new double[dimensions][dimensions];
+        for (int i = 0; i < dimensions; i++) {
+            deltas_matrix[i][i] = this.n_deltas.get(i); // by purpose not squared
+        }
+        Matrix deltasMatrix = new Matrix(deltas_matrix);
+        /*
+        System.out.println("DELTAAAAS");
+        for (int k = 0; k < 10; k++) {
+            //System.out.println(Arrays.toString(this.covMatrix[i]));
+            for (int l = 0; l < 10; l++) {
+                System.out.printf( "   " +  "%+.4f", deltasMatrix.A[k][l]);
+            }
+            System.out.println();
+        }
+        System.out.println();
+        */
+        Matrix covarianceMatrix = rotationalMatrixx.times(deltasMatrix).times(rotationalMatrixx.transpose());
+        Matrix LMatrix = rotationalMatrixx.times(deltasMatrix);
+        /*
+        System.out.println("ROTATIONAL MATRIX:");
+        for (int k = 0; k < 10; k++) {
+            //System.out.println(Arrays.toString(this.covMatrix[i]));
+            for (int l = 0; l < 10; l++) {
+                System.out.printf( "   " +  "%+.4f", rotationalMatrixx.A[k][l]);
+            }
+            System.out.println();
+        }
+        System.out.println();
+        */
+        Matrix covMatrix = LMatrix.times(LMatrix.transpose());
+
+        this.covMatrix = covarianceMatrix.A;
+        /*
+        System.out.println("COVARIANCE MATRIX:");
+        for (int k = 0; k < 10; k++) {
+            //System.out.println(Arrays.toString(this.covMatrix[i]));
+            for (int l = 0; l < 10; l++) {
+                System.out.printf( "   " +  "%+.4f", covMatrix[k][l]);
+            }
+            System.out.println();
+        }
+        System.out.println();
+        */
+        return LMatrix;
+    }
+
 
     /*
     public void CorrelatedMutation(double epsilon, double first_arg, double second_arg) {

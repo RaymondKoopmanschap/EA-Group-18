@@ -129,16 +129,17 @@ public class player18 implements ContestSubmission {
                         continue;
                     }
                 
-                    children.addAll(WholeArithmeticRecombination(parents, ARITHMETIC_RECOMB_ALPHA));
-                    //children.addAll(BlendCrossover(parents, BLEND_CROSSOVER_ALPHA));
+                    //children.addAll(WholeArithmeticRecombination(parents, ARITHMETIC_RECOMB_ALPHA));
+                    children.addAll(BlendCrossover(parents, BLEND_CROSSOVER_ALPHA));
                 }
 
                 // mutate children
                 for (int i = 0; i < children.size(); i ++) {
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll < MUTATION_PROBABILITY) {
-                        children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        //children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                         //children.get(i).CorrelatedMutation(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                 }
                 setFitnesses(children);
@@ -151,6 +152,7 @@ public class player18 implements ContestSubmission {
                 // elitism
                 survivors.addAll(elite);
                 setFitnesses(survivors);
+                sortPopulation(survivors);
 
                 islands.get(island).incrementGeneration();
                 population = survivors;

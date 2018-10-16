@@ -12,7 +12,7 @@ public class Matrix implements Cloneable, java.io.Serializable {
     /** Row and column dimensions.
      @serial row dimension column dimension.
      */
-    private int m, n;
+    public int m, n;
 
 /* ------------------------
    Constructors
