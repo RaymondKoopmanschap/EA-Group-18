@@ -78,7 +78,7 @@ public class player18 implements ContestSubmission {
         double ARITHMETIC_RECOMB_ALPHA = 0.11;
         double MUTATION_A = 2.3888;
         double MUTATION_B = 2.1666;
-        double MUTATION_EPSILON = 0.000001;
+        double MUTATION_EPSILON = 5.52773266332e-06;
         int MIGRATION_AFTER_EPOCHS = 150;
         double RECOMB_PROBABILITY = 0.9733333;
 
@@ -122,7 +122,6 @@ public class player18 implements ContestSubmission {
                 // produce children
                 List <Individual> children = new ArrayList<Individual>();
                 for (int i = 0; i < CHILDREN_SIZE / 2; i++) {
-
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll > RECOMB_PROBABILITY) {
                         children.add(parents.get(rnd_.nextInt(parents.size())));
@@ -165,9 +164,8 @@ public class player18 implements ContestSubmission {
                 }
 
                 //System.out.println(islands.get(island).last_recorded_fitness_changed + " " + islands.get(island).generations_without_fitness_change);
-                if (epochs % 200 == 0) {
-                    //System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
-                }
+                //System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
+                System.out.println(islands.get(island).population.get(0).fitness);
                 //System.out.println(islands.get(island).population.get(1).genotype.get(0) + " 1 " + island);
                 //System.out.println(islands.get(island).population.get(2).genotype.get(0) + " 3 " + island);
                 //
@@ -543,6 +541,7 @@ public class player18 implements ContestSubmission {
         for (Individual individual: children) {
             // Check fitness of unknown fuction
             if (individual.getFitness() == null) {
+                /*
                 boolean same_genotype_found = false;
                 for (Map.Entry<Double, ComputedGenotype> e : computed_genotypes.subMap(individual.genotype.get(0) - epsilon, individual.genotype.get(0) + epsilon).entrySet()) {
                     if (twoGenotypesEqual(individual.genotype, e.getValue().genotype)) {
@@ -554,6 +553,7 @@ public class player18 implements ContestSubmission {
                 if (same_genotype_found) {
                     continue;
                 }
+                */
                 if (evals >= evaluations_limit_) {
                     return;
                 }
