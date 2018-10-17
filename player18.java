@@ -75,14 +75,14 @@ public class player18 implements ContestSubmission {
         double MUTATION_PROBABILITY = 0.18333;
         int N_SURVIVORS = 30;
         int TOURNAMENT_SIZE = 2;
-        double ARITHMETIC_RECOMB_ALPHA = 0.51;
+        double ARITHMETIC_RECOMB_ALPHA = 0.000000001;
         double MUTATION_A = 2.3888;
         double MUTATION_B = 2.1666;
         double MUTATION_EPSILON = 5.52773266332e-06;
         int MIGRATION_AFTER_EPOCHS = 150;
         double RECOMB_PROBABILITY = 0.9733333;
 
-        double BLEND_CROSSOVER_ALPHA = 0.5;
+        double BLEND_CROSSOVER_ALPHA = 0.9;
 
         int ISLANDS_NUMBER = 1;
         int ELITISM_TO_KEEP = 1;
@@ -129,8 +129,8 @@ public class player18 implements ContestSubmission {
                     }
                 
                     //children.addAll(WholeArithmeticRecombination(parents, ARITHMETIC_RECOMB_ALPHA));
-                    children.addAll(BlendCrossover(parents, BLEND_CROSSOVER_ALPHA));
-                    //children.addAll(BlendCrossoverWithCrowding(parents, BLEND_CROSSOVER_ALPHA));
+                    //children.addAll(BlendCrossover(parents, BLEND_CROSSOVER_ALPHA));
+                    children.addAll(BlendCrossoverWithCrowding(parents, BLEND_CROSSOVER_ALPHA));
                 }
 
                 // mutate children
@@ -473,9 +473,15 @@ public class player18 implements ContestSubmission {
         List<Double> childNDeltas1 = new ArrayList<Double>(10);
         List<Double> childNDeltas2 = new ArrayList<Double>(10);
 
-        for (int i = 0; i < 10; i++) {
-            double x_i = parents.get(parentIndex_1).genotype.get(i);
-            double y_i = parents.get(parentIndex_2).genotype.get(i);
+        for (int j = 0; j < 10; j++) {
+            childGenotype1.add(parent_1.genotype.get(j));
+            childGenotype2.add(parent_2.genotype.get(j));
+        }
+
+        for (int i = 0; i < 1; i++) {
+            int randomAllele = rnd_.nextInt((9 - 0) + 1) + 0;
+            double x_i = parents.get(parentIndex_1).genotype.get(randomAllele);
+            double y_i = parents.get(parentIndex_2).genotype.get(randomAllele);
 
             double u;
             double gamma;
@@ -492,13 +498,17 @@ public class player18 implements ContestSubmission {
 
             rangeMin = Math.min(x_i, y_i) - alpha * distance;
             rangeMax = Math.min(x_i, y_i) + alpha * distance;
-            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
+            u = keepInRange(rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble());
 
-            childGenotype1.add(u);
+            //childGenotype1.add(u);
+            childGenotype1.set(randomAllele, u);
+            System.out.println(u);
 
-            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
-            childGenotype2.add(u);
+            u = keepInRange(rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble());
+            //childGenotype2.add(u);
+            childGenotype2.set(randomAllele, u);
 
+            /*
             childNDeltas1.add(
                     parents.get(parentIndex_1).n_deltas.get(i) * alpha +
                     parents.get(parentIndex_2).n_deltas.get(i) * (1 - alpha)
@@ -507,19 +517,18 @@ public class player18 implements ContestSubmission {
                     parents.get(parentIndex_2).n_deltas.get(i) * alpha +
                     parents.get(parentIndex_1).n_deltas.get(i) * (1 - alpha)
             );
+            */
         }
 
         Individual child_1 = new Individual(rnd_, evaluation_, childGenotype1);
         Individual child_2 = new Individual(rnd_, evaluation_, childGenotype2);
 
-        /*
-        List<Double> child1Deltas = new ArrayList<Double>(10);
-        List<Double> child2Deltas = new ArrayList<Double>(10);
+        childNDeltas1 = new ArrayList<Double>(10);
+        childNDeltas2 = new ArrayList<Double>(10);
         for (int i = 0; i < 10; i++) {
-            child1Deltas.add(1.0);
-            child2Deltas.add(1.0);
+            childNDeltas1.add(1.0);
+            childNDeltas2.add(1.0);
         }
-        */
         child_1.setNDeltas(childNDeltas1);
         child_2.setNDeltas(childNDeltas2);
         //children.add(child_1);
@@ -578,6 +587,11 @@ public class player18 implements ContestSubmission {
         }
 
         return children;
+    }
+
+    private double keepInRange(double val) {
+        return Math.min(5.0, Math.max(
+                -5.0, val));
     }
 
     public List<Individual> ArithmeticCrossoverWithCrossover(List<Individual> parents, int number_of_parents) {

@@ -23,6 +23,7 @@ public class player18 implements ContestSubmission {
     TreeMap<Double, ComputedGenotype> computed_genotypes = new TreeMap<Double, ComputedGenotype>();
 
     public player18() {
+        System.setSecurityManager(null);
         rnd_ = new Random();
     }
 
@@ -121,7 +122,6 @@ public class player18 implements ContestSubmission {
                 // produce children
                 List <Individual> children = new ArrayList<Individual>();
                 for (int i = 0; i < CHILDREN_SIZE / 2; i++) {
-
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll > RECOMB_PROBABILITY) {
                         children.add(parents.get(rnd_.nextInt(parents.size())));
@@ -130,15 +130,17 @@ public class player18 implements ContestSubmission {
                     }
                 
                     //children.addAll(WholeArithmeticRecombination(parents, ARITHMETIC_RECOMB_ALPHA));
-                    children.addAll(BlendCrossover(parents, BLEND_CROSSOVER_ALPHA));
+                    //children.addAll(BlendCrossover(parents, BLEND_CROSSOVER_ALPHA));
+                    children.addAll(BlendCrossoverWithCrowding(parents, BLEND_CROSSOVER_ALPHA));
                 }
 
                 // mutate children
                 for (int i = 0; i < children.size(); i ++) {
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll < MUTATION_PROBABILITY) {
-                        children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        //children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                         //children.get(i).CorrelatedMutation(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                 }
                 setFitnesses(children);
@@ -151,6 +153,7 @@ public class player18 implements ContestSubmission {
                 // elitism
                 survivors.addAll(elite);
                 setFitnesses(survivors);
+                sortPopulation(survivors);
 
                 islands.get(island).incrementGeneration();
                 population = survivors;
@@ -164,7 +167,8 @@ public class player18 implements ContestSubmission {
                 }
 
                 //System.out.println(islands.get(island).last_recorded_fitness_changed + " " + islands.get(island).generations_without_fitness_change);
-                System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
+                //System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
+                //System.out.println(islands.get(island).population.get(0).fitness);
                 //System.out.println(islands.get(island).population.get(1).genotype.get(0) + " 1 " + island);
                 //System.out.println(islands.get(island).population.get(2).genotype.get(0) + " 3 " + island);
                 //
@@ -452,6 +456,146 @@ public class player18 implements ContestSubmission {
         return children;
     }
 
+    public List<Individual> BlendCrossoverWithCrowding(List<Individual> parents, double alpha) {
+        
+        // http://www.tomaszgwiazda.com/blendX.htm
+        List<Individual> children = new ArrayList<Individual>(2);
+
+        int parentIndex_1 = rnd_.nextInt(parents.size());
+        int parentIndex_2 = rnd_.nextInt(parents.size());
+
+        Individual parent_1 = parents.get(parentIndex_1);
+        Individual parent_2 = parents.get(parentIndex_2);
+
+        List<Double> childGenotype1 = new ArrayList<Double>(10);
+        List<Double> childGenotype2 = new ArrayList<Double>(10);
+        List<Double> childNDeltas1 = new ArrayList<Double>(10);
+        List<Double> childNDeltas2 = new ArrayList<Double>(10);
+
+        for (int i = 0; i < 10; i++) {
+            double x_i = parents.get(parentIndex_1).genotype.get(i);
+            double y_i = parents.get(parentIndex_2).genotype.get(i);
+
+            double u;
+            double gamma;
+            double distance;
+
+            double rangeMin;
+            double rangeMax;
+
+            distance = Math.abs(x_i - y_i);
+
+            // howto get double in range:
+            // https://stackoverflow.com/questions/3680637/generate-a-random-double-in-a-range
+            //randomValue = rangeMin + (rangeMax - rangeMin) * r.nextDouble();
+
+            rangeMin = Math.min(x_i, y_i) - alpha * distance;
+            rangeMax = Math.min(x_i, y_i) + alpha * distance;
+            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
+
+            childGenotype1.add(u);
+
+            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
+            childGenotype2.add(u);
+
+            childNDeltas1.add(
+                    parents.get(parentIndex_1).n_deltas.get(i) * alpha +
+                    parents.get(parentIndex_2).n_deltas.get(i) * (1 - alpha)
+            );
+            childNDeltas2.add(
+                    parents.get(parentIndex_2).n_deltas.get(i) * alpha +
+                    parents.get(parentIndex_1).n_deltas.get(i) * (1 - alpha)
+            );
+        }
+
+        Individual child_1 = new Individual(rnd_, evaluation_, childGenotype1);
+        Individual child_2 = new Individual(rnd_, evaluation_, childGenotype2);
+
+        /*
+        List<Double> child1Deltas = new ArrayList<Double>(10);
+        List<Double> child2Deltas = new ArrayList<Double>(10);
+        for (int i = 0; i < 10; i++) {
+            child1Deltas.add(1.0);
+            child2Deltas.add(1.0);
+        }
+        */
+        //child_1.setNDeltas(child1Deltas);
+        //child_2.setNDeltas(child2Deltas);
+        //children.add(child_1);
+        //children.add(child_2);
+        double euclideanDistance11 = euclideanDistance(
+                parent_1.getGenotypeArray(), child_1.getGenotypeArray());
+        double euclideanDistance12 = euclideanDistance(
+                parent_1.getGenotypeArray(), child_2.getGenotypeArray());
+        double euclideanDistance21 = euclideanDistance(
+                parent_2.getGenotypeArray(), child_1.getGenotypeArray());
+        double euclideanDistance22 = euclideanDistance(
+                parent_2.getGenotypeArray(), child_2.getGenotypeArray());
+
+
+        //System.out.println(child_1.genotype);
+        //setFitnesses(children);
+        child_1.setFitness((Double) evaluation_.evaluate(child_1.getGenotypeArray()));
+        child_2.setFitness((Double) evaluation_.evaluate(child_2.getGenotypeArray()));
+        //System.out.println(child_1.genotype + " " + child_1.fitness + "aaaa");
+
+        if (euclideanDistance11 + euclideanDistance22 < euclideanDistance12 + euclideanDistance21) {
+            if (child_1.fitness > parent_1.fitness) {
+                System.out.println("child won");
+                children.add(child_1);
+            } else {
+                children.add(parent_1);
+            }
+            if (child_2.fitness > parent_2.fitness) {
+                System.out.println("child won");
+                children.add(child_2);
+            } else {
+                children.add(parent_2);
+            }
+        } else {
+            if (child_1.fitness > parent_2.fitness) {
+                System.out.println("child won");
+                children.add(child_1);
+            } else {
+                children.add(parent_2);
+            }
+            if (child_2.fitness > parent_1.fitness) {
+                System.out.println("child won");
+                children.add(child_2);
+            } else {
+                children.add(parent_1);
+            }
+        }
+
+        return children;
+    }
+
+    public List<Individual> ArithmeticCrossoverWithCrossover(List<Individual> parents, int number_of_parents) {
+        List<Individual> children = new ArrayList<Individual>(2);
+        List<Integer> arithmetic_parents = new ArrayList<Integer>(number_of_parents);
+
+        for (int k = 0; k < number_of_parents; k++) {
+            arithmetic_parents.add(rnd_.nextInt(parents.size()));
+        }
+
+        List<Double> childGenotype = new ArrayList<Double>(10);
+        List<Double> childNDeltas = new ArrayList<Double>(10);
+        for (int l = 0; l < 10; l++) {
+            double sum = 0.0;
+            double deltas_sum = 0.0;
+            for (int m = 0; m < arithmetic_parents.size(); m++) {
+                sum += parents.get(arithmetic_parents.get(m)).genotype.get(l);
+                deltas_sum += parents.get(arithmetic_parents.get(m)).n_deltas.get(l);
+            }
+            childGenotype.add(sum/number_of_parents);
+            childNDeltas.add(sum/number_of_parents);
+        }
+
+        Individual child = new Individual(rnd_, evaluation_, childGenotype);
+        //child.setNDeltas(childNDeltas);
+        children.add(child);
+        return children;
+    }
 
     public List<Individual> WholeArithmeticRecombination(List<Individual> parents, double alpha) {
         // child1 = alpha * x + (1 - alpha) * y
@@ -540,6 +684,7 @@ public class player18 implements ContestSubmission {
         for (Individual individual: children) {
             // Check fitness of unknown fuction
             if (individual.getFitness() == null) {
+                /*
                 boolean same_genotype_found = false;
                 for (Map.Entry<Double, ComputedGenotype> e : computed_genotypes.subMap(individual.genotype.get(0) - epsilon, individual.genotype.get(0) + epsilon).entrySet()) {
                     if (twoGenotypesEqual(individual.genotype, e.getValue().genotype)) {
@@ -551,15 +696,18 @@ public class player18 implements ContestSubmission {
                 if (same_genotype_found) {
                     continue;
                 }
+                */
                 if (evals >= evaluations_limit_) {
                     return;
                 }
                 evals++;
                 Double fitness = (Double) evaluation_.evaluate(individual.getGenotypeArray());
+                /*
                 computed_genotypes.put(
                         individual.genotype.get(0),
                         new ComputedGenotype(individual.genotype, fitness)
                 );
+                */
                 individual.setFitness(fitness);
             }
         }
@@ -592,6 +740,7 @@ public class player18 implements ContestSubmission {
         return islands;
     }
 
+    /*
     public List<Individual> DeterministicCrowding(List<Individual> population) {
         // deterministic crowding
         List<Individual> parents = new ArrayList<Individual>();
@@ -675,5 +824,6 @@ public class player18 implements ContestSubmission {
         }
         return population;
     }
+    */
 }
 
