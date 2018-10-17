@@ -6,6 +6,7 @@ import org.vu.contest.ContestEvaluation;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.*;
+import org.apache.commons.math3.linear.*;
 //import apache.commons.math3.distribution.*;
 
 
@@ -299,6 +300,38 @@ public class Individual {
     private double keepInRange(double val) {
         return Math.min(5.0, Math.max(
                 -5.0, val));
+    }
+
+    public double mutationDistance(Individual other) {
+        int dimensions = 10;
+        double[][] combinedVarianceArray = add2DArrays(this.covMatrix, other.covMatrix);
+        RealMatrix combinedVariance = MatrixUtils.createRealMatrix(combinedVarianceArray);
+        EigenDecomposition eigenDecomp = new EigenDecomposition(combinedVariance);
+
+        double[][] sqrtLambdaInvArray = new double[dimensions][dimensions];
+        for (int i = 0; i < dimensions; i++){
+            sqrtLambdaInvArray[i][i] = 1/Math.sqrt(eigenDecomp.getRealEigenvalues()[i]);
+        }
+
+        double[][] QArray = new double[dimensions][dimensions];
+//
+//        Matrix Q = new Ḿatrix(QArray);
+//        Matrix sqrtLambdaInv = new Ḿatrix(sqrtLambdaInvArray);
+//        double[][] xMatrixArray = new double[1][dimensions];
+//        differenceMatrixArray[0]= this.genotype - other.genotype;
+//        Matrix differenceMatrix = new Matrix(differenceMatrixArray);
+//        Matrix normalizedDistance = QTranspose.times(sqrtLambdaInv.times(QTranspose.transpose())).times(differenceMatrix.transpose());
+//        double distance = (normalizedDistance.transpose).times(normalizedDistance)[0][0];
+        return 1;
+    }
+    public static double[][] add2DArrays(double[][] matrix1, double[][] matrix2) {
+        double[][] addedMatrix = new double[matrix1.length][matrix1[0].length];
+        for (int i = 0; i < matrix1.length; i++) {
+            for (int j = 0; j < matrix1[0].length; j++) {
+                addedMatrix[i][j] = matrix1[i][j] + matrix2[i][j];
+            }
+        }
+        return addedMatrix;
     }
 
     private double[][] multivariateNormalDistribution(int n, Random rnd_) {
