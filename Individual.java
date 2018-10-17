@@ -313,16 +313,14 @@ public class Individual {
             sqrtLambdaInvArray[i][i] = 1/Math.sqrt(eigenDecomp.getRealEigenvalues()[i]);
         }
 
-        double[][] QArray = new double[dimensions][dimensions];
-//
-//        Matrix Q = new Ḿatrix(QArray);
-//        Matrix sqrtLambdaInv = new Ḿatrix(sqrtLambdaInvArray);
-//        double[][] xMatrixArray = new double[1][dimensions];
-//        differenceMatrixArray[0]= this.genotype - other.genotype;
-//        Matrix differenceMatrix = new Matrix(differenceMatrixArray);
-//        Matrix normalizedDistance = QTranspose.times(sqrtLambdaInv.times(QTranspose.transpose())).times(differenceMatrix.transpose());
-//        double distance = (normalizedDistance.transpose).times(normalizedDistance)[0][0];
-        return 1;
+        RealMatrix QReal = eigenDecomp.getV();
+        Matrix Q = new Matrix(QReal.getData());
+        Matrix sqrtLambdaInv = new Matrix(sqrtLambdaInvArray);
+        Matrix differenceMatrix = listMatrixConv(this.genotype).minus(listMatrixConv(other.genotype));
+        Matrix normalizedDistance = Q.times(sqrtLambdaInv.times(Q.transpose()))
+                .times(differenceMatrix.transpose());
+        double distance = (normalizedDistance.transpose()).times(normalizedDistance).A[0][0];
+        return distance;
     }
     public static double[][] add2DArrays(double[][] matrix1, double[][] matrix2) {
         double[][] addedMatrix = new double[matrix1.length][matrix1[0].length];
@@ -332,6 +330,14 @@ public class Individual {
             }
         }
         return addedMatrix;
+    }
+    public static Matrix listMatrixConv(List<Double> genotype){
+        double[][] arrayMat = new double[1][genotype.size()];
+        for (int i = 0; i < genotype.size(); i++){
+            arrayMat[0][i] = genotype.get(i);
+        }
+        Matrix matrix = new Matrix(arrayMat);
+        return matrix;
     }
 
     private double[][] multivariateNormalDistribution(int n, Random rnd_) {
