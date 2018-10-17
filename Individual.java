@@ -153,7 +153,7 @@ public class Individual {
             this.delta = epsilon; 
         }
         //System.out.println(this.delta);
-        this.genotype.set(randomAllele, this.genotype.get(randomAllele) + this.delta * rnd.nextGaussian());
+        this.genotype.set(randomAllele, keepInRange(this.genotype.get(randomAllele) + this.delta * rnd.nextGaussian()));
     }
 
     public void UncorrelatedMutationNStepSizes(double epsilon, double first_arg, double second_arg) {
@@ -172,7 +172,7 @@ public class Individual {
         }
         this.n_deltas.set(randomAllele,new_delta);
 
-        this.genotype.set(randomAllele, this.genotype.get(randomAllele) + this.n_deltas.get(randomAllele) * rnd.nextGaussian());
+        this.genotype.set(randomAllele, keepInRange(this.genotype.get(randomAllele) + this.n_deltas.get(randomAllele) * rnd.nextGaussian()));
     }
 
     public void UncorrelatedMutationNStepSizesMutateAll(double epsilon, double first_arg, double second_arg) {

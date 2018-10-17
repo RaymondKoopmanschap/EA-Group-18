@@ -1,3 +1,4 @@
 classes/artifacts/**
 .idea/workspace.xml
 .idea/tasks.xml
+tmp/

@@ -68,24 +68,24 @@ public class player18 implements ContestSubmission {
 
 
     public void run() {
-        int POPULATION_SIZE = 100;
-        int CHILDREN_SIZE = 10;
-        double PARENTS_SIZE = 20;
+        int POPULATION_SIZE = 200;
+        int CHILDREN_SIZE = 100;
+        double PARENTS_SIZE = 40;
         int ARITHMETIC_XOVER_N_PARENTS = 2;
-        double MUTATION_PROBABILITY = 0.18333;
-        int N_SURVIVORS = 30;
-        int TOURNAMENT_SIZE = 2;
-        double ARITHMETIC_RECOMB_ALPHA = 0.51;
-        double MUTATION_A = 2.3888;
+        double MUTATION_PROBABILITY = 0.98;
+        int N_SURVIVORS = 100;
+        int TOURNAMENT_SIZE = 70;
+        double ARITHMETIC_RECOMB_ALPHA = 0.11;
+        double MUTATION_A = 2.388888;
         double MUTATION_B = 2.1666;
         double MUTATION_EPSILON = 5.52773266332e-06;
-        int MIGRATION_AFTER_EPOCHS = 150;
-        double RECOMB_PROBABILITY = 0.9733333;
+        int MIGRATION_AFTER_EPOCHS = 10;
+        double RECOMB_PROBABILITY = 0.853333;
 
-        double BLEND_CROSSOVER_ALPHA = 0.5;
+        double BLEND_CROSSOVER_ALPHA = 0.9;
 
         int ISLANDS_NUMBER = 1;
-        int ELITISM_TO_KEEP = 1;
+        int ELITISM_TO_KEEP = 10;
 
         List<Island> islands = InitializeIslands(ISLANDS_NUMBER, POPULATION_SIZE);
 
@@ -94,7 +94,8 @@ public class player18 implements ContestSubmission {
         while (evals < evaluations_limit_) {
             epochs += 1;
 
-            //TOURNAMENT_SIZE = Math.min(80, 130 - (int) (100* (1-0.95 * evals/evaluations_limit_)));
+            //TOURNAMENT_SIZE = Math.min(80, 191 - (int) (100* (1-0.95 * evals/evaluations_limit_)));
+            //System.out.println(TOURNAMENT_SIZE + "evals" + evaluations_limit_);
             if (evals > evaluations_limit_) {
                 ELITISM_TO_KEEP = 1;
             }
@@ -104,6 +105,7 @@ public class player18 implements ContestSubmission {
                 setFitnesses(population);
 
                 sortPopulation(population);
+
                 List<Individual> elite = new ArrayList<Individual>();
                 for (int j = 0; j < ELITISM_TO_KEEP; j++) {
                     Individual one_elite = new Individual(rnd_, evaluation_, population.get(j).genotype);
@@ -120,26 +122,40 @@ public class player18 implements ContestSubmission {
 
                 // produce children
                 List <Individual> children = new ArrayList<Individual>();
-                for (int i = 0; i < CHILDREN_SIZE; i++) {
+                for (int i = 0; i < CHILDREN_SIZE / 2; i++) {
                     double dice_roll = rnd_.nextDouble();
+                    /*
                     if (dice_roll > RECOMB_PROBABILITY) {
                         children.add(parents.get(rnd_.nextInt(parents.size())));
                         children.add(parents.get(rnd_.nextInt(parents.size())));
                         continue;
                     }
+                    */
                 
-                    //children.addAll(WholeArithmeticRecombination(parents, ARITHMETIC_RECOMB_ALPHA));
-                    children.addAll(BlendCrossover(parents, BLEND_CROSSOVER_ALPHA));
-                    //children.addAll(BlendCrossoverWithCrowding(parents, BLEND_CROSSOVER_ALPHA));
+                    List <Individual> two_parents = new ArrayList<Individual>();
+                    List <Individual> two_children = new ArrayList<Individual>();
+                    int parentIndex_1 = rnd_.nextInt(parents.size());
+                    int parentIndex_2 = rnd_.nextInt(parents.size());
+
+                    Individual parent_1 = parents.get(parentIndex_1);
+                    Individual parent_2 = parents.get(parentIndex_2);
+                    two_parents.add(parent_1);
+                    two_parents.add(parent_2);
+
+                    //two_children = OnePointCrossover(parents);
+                    //two_children = WholeArithmeticRecombination(parents, ARITHMETIC_RECOMB_ALPHA);
+                    two_children = BlendCrossover(parents, BLEND_CROSSOVER_ALPHA);
+
+                    children.addAll(Crowding(two_parents, two_children));
                 }
 
                 // mutate children
                 for (int i = 0; i < children.size(); i ++) {
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll < MUTATION_PROBABILITY) {
-                        children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        //children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                         //children.get(i).CorrelatedMutation(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
-                        //children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                 }
                 setFitnesses(children);
@@ -150,7 +166,7 @@ public class player18 implements ContestSubmission {
                     survivors.addAll(TournamentSelection(children, TOURNAMENT_SIZE));
                 }
                 // elitism
-                survivors.addAll(elite);
+                //survivors.addAll(elite);
                 setFitnesses(survivors);
                 sortPopulation(survivors);
 
@@ -166,8 +182,10 @@ public class player18 implements ContestSubmission {
                 }
 
                 //System.out.println(islands.get(island).last_recorded_fitness_changed + " " + islands.get(island).generations_without_fitness_change);
-                //System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
-                System.out.println(islands.get(island).population.get(0).fitness);
+                if (epochs % 25 == 0) {
+                    System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
+                }
+                //System.out.println(islands.get(island).population.get(0).fitness);
                 //System.out.println(islands.get(island).population.get(1).genotype.get(0) + " 1 " + island);
                 //System.out.println(islands.get(island).population.get(2).genotype.get(0) + " 3 " + island);
                 //
@@ -337,8 +355,8 @@ public class player18 implements ContestSubmission {
 
         List<Individual> children = new ArrayList<Individual>(2);
 
-        int firstIndividual = rnd_.nextInt(parents.size());
-        int secondIndividual = rnd_.nextInt(parents.size());
+        int firstIndividual = 0;
+        int secondIndividual = 1;
         int crossoverPoint = rnd_.nextInt(rnd_.nextInt((7 - 0) + 1) + 1);
         List<Double> childGenotype1 = new ArrayList<Double>(10);
         List<Double> childGenotype2 = new ArrayList<Double>(10);
@@ -400,8 +418,8 @@ public class player18 implements ContestSubmission {
         
         List<Individual> children = new ArrayList<Individual>(2);
 
-        int parentIndex_1 = rnd_.nextInt(parents.size());
-        int parentIndex_2 = rnd_.nextInt(parents.size());
+        int parentIndex_1 = 0;
+        int parentIndex_2 = 1;
 
         List<Double> childGenotype1 = new ArrayList<Double>(10);
         List<Double> childGenotype2 = new ArrayList<Double>(10);
@@ -427,14 +445,13 @@ public class player18 implements ContestSubmission {
 
             rangeMin = Math.min(x_i, y_i) - alpha * distance;
             rangeMax = Math.min(x_i, y_i) + alpha * distance;
-            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
+            u = keepInRange(rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble());
 
             childGenotype1.add(u);
 
-            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
+            u = keepInRange(rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble());
             childGenotype2.add(u);
 
-            /*
             childNDeltas1.add(
                     parents.get(parentIndex_1).n_deltas.get(i) * alpha +
                     parents.get(parentIndex_2).n_deltas.get(i) * (1 - alpha)
@@ -443,87 +460,26 @@ public class player18 implements ContestSubmission {
                     parents.get(parentIndex_2).n_deltas.get(i) * alpha +
                     parents.get(parentIndex_1).n_deltas.get(i) * (1 - alpha)
             );
-            */
         }
 
         Individual child_1 = new Individual(rnd_, evaluation_, childGenotype1);
         Individual child_2 = new Individual(rnd_, evaluation_, childGenotype2);
 
-        //child_1.setNDeltas(childNDeltas1);
-        //child_2.setNDeltas(childNDeltas2);
+        child_1.setNDeltas(childNDeltas1);
+        child_2.setNDeltas(childNDeltas2);
 
         children.add(child_1);
         children.add(child_2);
         return children;
     }
 
-    public List<Individual> BlendCrossoverWithCrowding(List<Individual> parents, double alpha) {
-        
-        // http://www.tomaszgwiazda.com/blendX.htm
-        List<Individual> children = new ArrayList<Individual>(2);
+    public List<Individual> Crowding(List<Individual> parents, List<Individual> children) {
+        Individual child_1 = children.get(0);
+        //System.out.println(child_1.genotype + "aaaa");
+        Individual child_2 = children.get(1);
+        Individual parent_1 = parents.get(0);
+        Individual parent_2 = parents.get(1);
 
-        int parentIndex_1 = rnd_.nextInt(parents.size());
-        int parentIndex_2 = rnd_.nextInt(parents.size());
-
-        Individual parent_1 = parents.get(parentIndex_1);
-        Individual parent_2 = parents.get(parentIndex_2);
-
-        List<Double> childGenotype1 = new ArrayList<Double>(10);
-        List<Double> childGenotype2 = new ArrayList<Double>(10);
-        List<Double> childNDeltas1 = new ArrayList<Double>(10);
-        List<Double> childNDeltas2 = new ArrayList<Double>(10);
-
-        for (int i = 0; i < 10; i++) {
-            double x_i = parents.get(parentIndex_1).genotype.get(i);
-            double y_i = parents.get(parentIndex_2).genotype.get(i);
-
-            double u;
-            double gamma;
-            double distance;
-
-            double rangeMin;
-            double rangeMax;
-
-            distance = Math.abs(x_i - y_i);
-
-            // howto get double in range:
-            // https://stackoverflow.com/questions/3680637/generate-a-random-double-in-a-range
-            //randomValue = rangeMin + (rangeMax - rangeMin) * r.nextDouble();
-
-            rangeMin = Math.min(x_i, y_i) - alpha * distance;
-            rangeMax = Math.min(x_i, y_i) + alpha * distance;
-            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
-
-            childGenotype1.add(u);
-
-            u = rangeMin + (rangeMax - rangeMin) * rnd_.nextDouble();
-            childGenotype2.add(u);
-
-            childNDeltas1.add(
-                    parents.get(parentIndex_1).n_deltas.get(i) * alpha +
-                    parents.get(parentIndex_2).n_deltas.get(i) * (1 - alpha)
-            );
-            childNDeltas2.add(
-                    parents.get(parentIndex_2).n_deltas.get(i) * alpha +
-                    parents.get(parentIndex_1).n_deltas.get(i) * (1 - alpha)
-            );
-        }
-
-        Individual child_1 = new Individual(rnd_, evaluation_, childGenotype1);
-        Individual child_2 = new Individual(rnd_, evaluation_, childGenotype2);
-
-        /*
-        List<Double> child1Deltas = new ArrayList<Double>(10);
-        List<Double> child2Deltas = new ArrayList<Double>(10);
-        for (int i = 0; i < 10; i++) {
-            child1Deltas.add(1.0);
-            child2Deltas.add(1.0);
-        }
-        */
-        child_1.setNDeltas(childNDeltas1);
-        child_2.setNDeltas(childNDeltas2);
-        //children.add(child_1);
-        //children.add(child_2);
         double euclideanDistance11 = euclideanDistance(
                 parent_1.getGenotypeArray(), child_1.getGenotypeArray());
         double euclideanDistance12 = euclideanDistance(
@@ -534,43 +490,31 @@ public class player18 implements ContestSubmission {
                 parent_2.getGenotypeArray(), child_2.getGenotypeArray());
 
 
-        //System.out.println(child_1.genotype);
-        //setFitnesses(children);
         child_1.setFitness((Double) evaluation_.evaluate(child_1.getGenotypeArray()));
         child_2.setFitness((Double) evaluation_.evaluate(child_2.getGenotypeArray()));
-        evals += 2;
-
-        if(parent_1.fitness == null) {
-            parent_1.setFitness((Double) evaluation_.evaluate(parent_1.getGenotypeArray()));
-            evals += 1;
-        }
-        if(parent_2.fitness == null) {
-            parent_2.setFitness((Double) evaluation_.evaluate(parent_2.getGenotypeArray()));
-            evals += 1;
-        }
 
         if (euclideanDistance11 + euclideanDistance22 < euclideanDistance12 + euclideanDistance21) {
             if (child_1.fitness > parent_1.fitness) {
-                System.out.println("child won1");
+                //System.out.println("child won");
                 children.add(child_1);
             } else {
                 children.add(parent_1);
             }
             if (child_2.fitness > parent_2.fitness) {
-                System.out.println("child won2");
+                //System.out.println("child won");
                 children.add(child_2);
             } else {
                 children.add(parent_2);
             }
         } else {
             if (child_1.fitness > parent_2.fitness) {
-                System.out.println("child won3");
+                //System.out.println("child won");
                 children.add(child_1);
             } else {
                 children.add(parent_2);
             }
             if (child_2.fitness > parent_1.fitness) {
-                System.out.println("child won4");
+                //System.out.println("child won");
                 children.add(child_2);
             } else {
                 children.add(parent_1);
@@ -578,6 +522,11 @@ public class player18 implements ContestSubmission {
         }
 
         return children;
+    }
+
+    private double keepInRange(double val) {
+        return Math.min(5.0, Math.max(
+                -5.0, val));
     }
 
     public List<Individual> ArithmeticCrossoverWithCrossover(List<Individual> parents, int number_of_parents) {
@@ -611,12 +560,10 @@ public class player18 implements ContestSubmission {
         // child1 = alpha * x + (1 - alpha) * y
         // child2 = alpha * y + (1 - alpha) * x
 
-        
-        
         List<Individual> children = new ArrayList<Individual>(2);
 
-        int parentIndex_1 = rnd_.nextInt(parents.size());
-        int parentIndex_2 = rnd_.nextInt(parents.size());
+        int parentIndex_1 = 0;
+        int parentIndex_2 = 1;
 
         List<Double> childGenotype1 = new ArrayList<Double>(10);
         List<Double> childGenotype2 = new ArrayList<Double>(10);
