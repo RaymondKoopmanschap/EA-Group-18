@@ -71,7 +71,7 @@ public class player18 implements ContestSubmission {
         int CHILDREN_SIZE = 100;
         int ARITHMETIC_XOVER_N_PARENTS = 2;
         double MUTATION_PROBABILITY = 0.083333;
-        int TOURNAMENT_SIZE = 2;
+        int TOURNAMENT_SIZE = 6;
         double ARITHMETIC_RECOMB_ALPHA = 0.11;
         double MUTATION_A = 2.3888;
         double MUTATION_B = 2.1666;
@@ -81,7 +81,7 @@ public class player18 implements ContestSubmission {
 
         double BLEND_CROSSOVER_ALPHA = 0.5;
 
-        int ISLANDS_NUMBER = 1;
+        int ISLANDS_NUMBER = 10;
         int ELITISM_TO_KEEP = 1;
 
         List<Island> islands = InitializeIslands(ISLANDS_NUMBER, POPULATION_SIZE);
@@ -109,6 +109,7 @@ public class player18 implements ContestSubmission {
 
                 // produce children
                 List <Individual> children = new ArrayList<Individual>();
+                setPopulationTemporaryIndexes(population);
                 while (children.size() < CHILDREN_SIZE) {
                     double dice_roll = rnd_.nextDouble();
                     /*
@@ -152,13 +153,13 @@ public class player18 implements ContestSubmission {
                 for (int i = 0; i < children.size(); i ++) {
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll < MUTATION_PROBABILITY) {
-                        children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        //children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                         //children.get(i).CorrelatedMutation(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                         //children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                 }
-                */
                 setFitnesses(children);
+                */
 
                 // Select survivors
                 List <Individual> survivors = new ArrayList<Individual>();
@@ -197,8 +198,7 @@ public class player18 implements ContestSubmission {
                 //System.out.println(islands.get(island).last_recorded_fitness_changed + " " + islands.get(island).generations_without_fitness_change);
                 if (epochs % 15 == 0) {
                     System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
-                    System.out.println(islands.get(island).population.get(1).genotype + " 0 " + islands.get(island).population.get(1).fitness);
-                    System.out.println(islands.get(island).population.get(2).genotype + " 0 " + islands.get(island).population.get(2).fitness);
+                    System.out.println(islands.get(island).population.get(99).genotype + " 0 " + islands.get(island).population.get(99).fitness);
                     populationStatistics(islands.get(island).population);
                 }
                 //System.out.println(islands.get(island).population.get(0).fitness);
@@ -210,13 +210,11 @@ public class player18 implements ContestSubmission {
                     IslandMigration(islands.get(island), islands);
                 }
                 */
-                /*
-                if (islands.get(island).generations_without_fitness_change > 20 && i % 3 == 0) {
+                if (islands.get(island).generations_without_fitness_change > 50) {
                     //System.out.println("initialized new island");
-                    //IslandMigration(islands.get(i), islands);
-                    islands.set(i, InitializeRandomIsland(POPULATION_SIZE));
+                    IslandMigration(islands.get(island), islands);
+                    //islands.set(island, InitializeRandomIsland(POPULATION_SIZE));
                 }
-                */
             }
         }
     }
@@ -737,24 +735,15 @@ public class player18 implements ContestSubmission {
         int diverseIndividuals = 0;
         boolean areDiverse = true;
         sortPopulation(population);
-        for (int i = 0; i < population.size(); i ++) {
+        for (int i = 1; i < population.size(); i ++) {
             areDiverse = true;
-            for (int j = 0; j < population.size(); j++) {
-                if(i == j) {
-                    continue;
-                }
-                if (twoGenotypesEqual(population.get(i).genotype, population.get(j).genotype)) {
-                    areDiverse = false;
-                    break;
-                }
-            }
-            if (areDiverse) {
+            if (!twoGenotypesEqual(population.get(0).genotype, population.get(i).genotype)) {
                 diverseIndividuals += 1;
             }
         }
         System.out.println("POPULATION STATS:");
         System.out.printf("EVALUATIONS: " + "%.2f" +  " BEST FITNESS: " + population.get(0).fitness + "\n", (double) evals /  evaluations_limit_ * 100);
-        System.out.println("DIVERSITY: " + diverseIndividuals + "/" + population.size());
+        System.out.println("DIVERSE FROM BEST: " + diverseIndividuals + "/" + population.size());
 
     }
 

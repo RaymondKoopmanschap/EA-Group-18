@@ -15,14 +15,14 @@ def main(schaffers=False, katsuura=False):
     if not schaffers and not katsuura:
         # bentcigar parameters
         parameters_dict = OrderedDict([
-            ('ISLANDS_NUMBER', np.linspace(1, 1000, 1, dtype='int')),
+            ('ISLANDS_NUMBER', np.linspace(10, 1000, 1, dtype='int')),
             ('POPULATION_SIZE', np.linspace(100, 100, 1, dtype='int')),
             ('CHILDREN_SIZE', np.linspace(100, 800, 1, dtype='int')),
             ('ARITHMETIC_XOVER_N_PARENTS', np.linspace(2, 8, 1, dtype='int')),
             ('MUTATION_PROBABILITY', np.linspace(0.083333, 0.96, 1)),
             ('RECOMB_PROBABILITY', np.linspace(0.9733333, 0.86, 1)),
             ('N_SURVIVORS', np.linspace(30, 100, 1, dtype='int')),
-            ('TOURNAMENT_SIZE', np.linspace(2, 10, 1, dtype='int')),
+            ('TOURNAMENT_SIZE', np.linspace(6, 10, 1, dtype='int')),
             ('ARITHMETIC_RECOMB_ALPHA', np.linspace(0.11, 0.42, 1)),
             ('MUTATION_A', np.linspace(2.3888, 2.5, 1)),
             ('MUTATION_B', np.linspace(2.1666, 2.5, 1)),
