@@ -66,26 +66,23 @@ public class player18 implements ContestSubmission {
         }
     }
 
-
     public void run() {
-        int POPULATION_SIZE = 200;
+        int POPULATION_SIZE = 100;
         int CHILDREN_SIZE = 100;
-        double PARENTS_SIZE = 40;
         int ARITHMETIC_XOVER_N_PARENTS = 2;
-        double MUTATION_PROBABILITY = 0.98;
-        int N_SURVIVORS = 100;
-        int TOURNAMENT_SIZE = 70;
+        double MUTATION_PROBABILITY = 0.083333;
+        int TOURNAMENT_SIZE = 20;
         double ARITHMETIC_RECOMB_ALPHA = 0.11;
-        double MUTATION_A = 2.388888;
+        double MUTATION_A = 2.3888;
         double MUTATION_B = 2.1666;
         double MUTATION_EPSILON = 5.52773266332e-06;
-        int MIGRATION_AFTER_EPOCHS = 10;
-        double RECOMB_PROBABILITY = 0.853333;
+        int MIGRATION_AFTER_EPOCHS = 150;
+        double RECOMB_PROBABILITY = 0.9733333;
 
-        double BLEND_CROSSOVER_ALPHA = 0.9;
+        double BLEND_CROSSOVER_ALPHA = 0.5;
 
         int ISLANDS_NUMBER = 1;
-        int ELITISM_TO_KEEP = 10;
+        int ELITISM_TO_KEEP = 1;
 
         List<Island> islands = InitializeIslands(ISLANDS_NUMBER, POPULATION_SIZE);
 
@@ -94,8 +91,7 @@ public class player18 implements ContestSubmission {
         while (evals < evaluations_limit_) {
             epochs += 1;
 
-            //TOURNAMENT_SIZE = Math.min(80, 191 - (int) (100* (1-0.95 * evals/evaluations_limit_)));
-            //System.out.println(TOURNAMENT_SIZE + "evals" + evaluations_limit_);
+            //TOURNAMENT_SIZE = Math.min(80, 130 - (int) (100* (1-0.95 * evals/evaluations_limit_)));
             if (evals > evaluations_limit_) {
                 ELITISM_TO_KEEP = 1;
             }
@@ -113,16 +109,10 @@ public class player18 implements ContestSubmission {
                     one_elite.setFitness(population.get(j).fitness);
                     elite.add(one_elite);
                 }
-                
-                // Select parents
-                List <Individual> parents = new ArrayList<Individual>();
-                for (int i = 0; i < PARENTS_SIZE; i++) {
-                    parents.addAll(TournamentSelection(population, TOURNAMENT_SIZE));
-                }
 
                 // produce children
                 List <Individual> children = new ArrayList<Individual>();
-                for (int i = 0; i < CHILDREN_SIZE / 2; i++) {
+                while (children.size() < CHILDREN_SIZE) {
                     double dice_roll = rnd_.nextDouble();
                     /*
                     if (dice_roll > RECOMB_PROBABILITY) {
@@ -134,37 +124,64 @@ public class player18 implements ContestSubmission {
                 
                     List <Individual> two_parents = new ArrayList<Individual>();
                     List <Individual> two_children = new ArrayList<Individual>();
-                    int parentIndex_1 = rnd_.nextInt(parents.size());
-                    int parentIndex_2 = rnd_.nextInt(parents.size());
 
-                    Individual parent_1 = parents.get(parentIndex_1);
-                    Individual parent_2 = parents.get(parentIndex_2);
+                    int parentIndex_1 = TournamentSelection(population, TOURNAMENT_SIZE);
+                    int parentIndex_2 = TournamentSelection(population, TOURNAMENT_SIZE);
+                    /*
+                    while (parentIndex_1 == parentIndex_2) {
+                        parentIndex_1 = TournamentSelection(population, TOURNAMENT_SIZE);
+                        parentIndex_2 = TournamentSelection(population, TOURNAMENT_SIZE);
+                    }
+                    */
+                    Individual parent_1 = population.get(parentIndex_1);
+                    Individual parent_2 = population.get(parentIndex_2);
                     two_parents.add(parent_1);
                     two_parents.add(parent_2);
 
-                    //two_children = OnePointCrossover(parents);
-                    //two_children = WholeArithmeticRecombination(parents, ARITHMETIC_RECOMB_ALPHA);
-                    two_children = BlendCrossover(parents, BLEND_CROSSOVER_ALPHA);
+                    //two_children = OnePointCrossover(two_parents);
+                    //two_children = WholeArithmeticRecombination(two_parents, ARITHMETIC_RECOMB_ALPHA);
+                    two_children = BlendCrossover(two_parents, BLEND_CROSSOVER_ALPHA);
+
+                    for (int i = 0; i < two_children.size(); i++) {
+                        dice_roll = rnd_.nextDouble();
+                        two_children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                    }
 
                     children.addAll(Crowding(two_parents, two_children));
+                    //children.addAll(two_children);
                 }
 
                 // mutate children
+                /*
                 for (int i = 0; i < children.size(); i ++) {
                     double dice_roll = rnd_.nextDouble();
                     if (dice_roll < MUTATION_PROBABILITY) {
-                        //children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                         //children.get(i).CorrelatedMutation(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
-                        children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        //children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                 }
+                */
                 setFitnesses(children);
 
                 // Select survivors
                 List <Individual> survivors = new ArrayList<Individual>();
-                for (int i = 0; i < POPULATION_SIZE; i++) {
-                    survivors.addAll(TournamentSelection(children, TOURNAMENT_SIZE));
+                setPopulationTemporaryIndexes(children);
+
+                survivors.addAll(children.subList(0, POPULATION_SIZE));
+
+                /*
+                List <Integer> survivorIndexes = new ArrayList<Integer>();
+                while(survivorIndexes.size() < POPULATION_SIZE) {
+                    int survivorIndex = TournamentSelection(children, TOURNAMENT_SIZE);
+                    if (survivorIndexes.contains(survivorIndex)) {
+                        continue;
+                    }
+
+                    survivorIndexes.add(survivorIndex);
+                    survivors.add(children.get(survivorIndex));
                 }
+                */
                 // elitism
                 //survivors.addAll(elite);
                 setFitnesses(survivors);
@@ -182,8 +199,11 @@ public class player18 implements ContestSubmission {
                 }
 
                 //System.out.println(islands.get(island).last_recorded_fitness_changed + " " + islands.get(island).generations_without_fitness_change);
-                if (epochs % 25 == 0) {
+                if (epochs % 15 == 0) {
                     System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
+                    System.out.println(islands.get(island).population.get(1).genotype + " 0 " + islands.get(island).population.get(1).fitness);
+                    System.out.println(islands.get(island).population.get(2).genotype + " 0 " + islands.get(island).population.get(2).fitness);
+                    populationStatistics(islands.get(island).population);
                 }
                 //System.out.println(islands.get(island).population.get(0).fitness);
                 //System.out.println(islands.get(island).population.get(1).genotype.get(0) + " 1 " + island);
@@ -202,6 +222,12 @@ public class player18 implements ContestSubmission {
                 }
                 */
             }
+        }
+    }
+
+    void setPopulationTemporaryIndexes(List<Individual> population) {
+        for (int i = 0; i < population.size(); i++) {
+            population.get(i).setTempPopulationIndex(i);
         }
     }
 
@@ -276,17 +302,20 @@ public class player18 implements ContestSubmission {
         return parents;
     }
 
-    public List<Individual> TournamentSelection(List<Individual> population, int TOURNAMENT_SIZE) {
+    int TournamentSelection(List<Individual> population, int TOURNAMENT_SIZE) {
 
         List<Individual> parents = new ArrayList<Individual>();
         List<Integer> added_parents = new ArrayList<Integer>();
+
+        setPopulationTemporaryIndexes(population);
         int k = TOURNAMENT_SIZE;
         int produced_parents = population.size();
 
         List<Individual> competitors = new ArrayList<Individual>();
 
         for (int i = 0; i < k; i++) {
-            competitors.add(population.get(rnd_.nextInt(population.size())));
+            int randomIndex = rnd_.nextInt(population.size());
+            competitors.add(population.get(randomIndex));
         }
         List<Integer> competitorsResults = new ArrayList<Integer>(competitors.size());
         for (int i = 0; i < competitors.size(); i++) {
@@ -317,7 +346,7 @@ public class player18 implements ContestSubmission {
             }
         }
         //System.out.println(" " + competitorsResults + " " + best_competitor);
-        return competitors.subList(best_competitor, best_competitor + 1);
+        return competitors.subList(best_competitor, best_competitor + 1).get(0).tmp_population_index;
     }
 
     public List<Individual> OverSelection(List<Individual> population) {
@@ -468,6 +497,9 @@ public class player18 implements ContestSubmission {
         child_1.setNDeltas(childNDeltas1);
         child_2.setNDeltas(childNDeltas2);
 
+        child_1.setNAlphas(parents.get(parentIndex_1).n_alphas);
+        child_2.setNAlphas(parents.get(parentIndex_2).n_alphas);
+
         children.add(child_1);
         children.add(child_2);
         return children;
@@ -475,53 +507,61 @@ public class player18 implements ContestSubmission {
 
     public List<Individual> Crowding(List<Individual> parents, List<Individual> children) {
         Individual child_1 = children.get(0);
-        //System.out.println(child_1.genotype + "aaaa");
         Individual child_2 = children.get(1);
         Individual parent_1 = parents.get(0);
         Individual parent_2 = parents.get(1);
+        List<Individual> newChildren = new ArrayList<Individual>();
 
-        double euclideanDistance11 = euclideanDistance(
-                parent_1.getGenotypeArray(), child_1.getGenotypeArray());
-        double euclideanDistance12 = euclideanDistance(
-                parent_1.getGenotypeArray(), child_2.getGenotypeArray());
-        double euclideanDistance21 = euclideanDistance(
-                parent_2.getGenotypeArray(), child_1.getGenotypeArray());
-        double euclideanDistance22 = euclideanDistance(
-                parent_2.getGenotypeArray(), child_2.getGenotypeArray());
-
+        double distance11;
+        double distance12;
+        double distance21;
+        double distance22;
+        if (true) {
+            //euclidean
+            distance11 = euclideanDistance(parent_1.getGenotypeArray(), child_1.getGenotypeArray());
+            distance12 = euclideanDistance(parent_1.getGenotypeArray(), child_2.getGenotypeArray());
+            distance21 = euclideanDistance(parent_2.getGenotypeArray(), child_1.getGenotypeArray());
+            distance22 = euclideanDistance(parent_2.getGenotypeArray(), child_2.getGenotypeArray());
+        } else {
+            distance11 = parent_1.ourMutationDistance(child_1);
+            distance12 = parent_1.ourMutationDistance(child_2);
+            distance21 = parent_2.ourMutationDistance(child_1);
+            distance22 = parent_2.ourMutationDistance(child_2);
+        }
 
         child_1.setFitness((Double) evaluation_.evaluate(child_1.getGenotypeArray()));
         child_2.setFitness((Double) evaluation_.evaluate(child_2.getGenotypeArray()));
+        evals += 2;
 
-        if (euclideanDistance11 + euclideanDistance22 < euclideanDistance12 + euclideanDistance21) {
-            if (child_1.fitness > parent_1.fitness) {
+        if (distance11 + distance22 < distance12 + distance21) {
+            if (child_1.fitness >= parent_1.fitness) {
                 //System.out.println("child won");
-                children.add(child_1);
+                newChildren.add(child_1);
             } else {
-                children.add(parent_1);
+                newChildren.add(parent_1);
             }
-            if (child_2.fitness > parent_2.fitness) {
+            if (child_2.fitness >= parent_2.fitness) {
                 //System.out.println("child won");
-                children.add(child_2);
+                newChildren.add(child_2);
             } else {
-                children.add(parent_2);
+                newChildren.add(parent_2);
             }
         } else {
-            if (child_1.fitness > parent_2.fitness) {
+            if (child_1.fitness >= parent_2.fitness) {
                 //System.out.println("child won");
-                children.add(child_1);
+                newChildren.add(child_1);
             } else {
-                children.add(parent_2);
+                newChildren.add(parent_2);
             }
-            if (child_2.fitness > parent_1.fitness) {
+            if (child_2.fitness >= parent_1.fitness) {
                 //System.out.println("child won");
-                children.add(child_2);
+                newChildren.add(child_2);
             } else {
-                children.add(parent_1);
+                newChildren.add(parent_1);
             }
         }
 
-        return children;
+        return newChildren;
     }
 
     private double keepInRange(double val) {
@@ -695,6 +735,31 @@ public class player18 implements ContestSubmission {
             setFitnesses(islands.get(i).population);
         }
         return islands;
+    }
+
+    public void populationStatistics(List<Individual> population) {
+        int diverseIndividuals = 0;
+        boolean areDiverse = true;
+        sortPopulation(population);
+        for (int i = 0; i < population.size(); i ++) {
+            areDiverse = true;
+            for (int j = 0; j < population.size(); j++) {
+                if(i == j) {
+                    continue;
+                }
+                if (twoGenotypesEqual(population.get(i).genotype, population.get(j).genotype)) {
+                    areDiverse = false;
+                    break;
+                }
+            }
+            if (areDiverse) {
+                diverseIndividuals += 1;
+            }
+        }
+        System.out.println("POPULATION STATS:");
+        System.out.printf("EVALUATIONS: " + "%.2f" +  " BEST FITNESS: " + population.get(0).fitness + "\n", (double) evals /  evaluations_limit_ * 100);
+        System.out.println("DIVERSITY: " + diverseIndividuals + "/" + population.size());
+
     }
 
     /*

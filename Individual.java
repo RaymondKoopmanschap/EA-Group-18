@@ -17,6 +17,7 @@ public class Individual {
     Random rnd;
 
     int age;
+    int tmp_population_index;
 
     Double ranking_probability_linear;
     Double ranking_probability_exp;
@@ -86,6 +87,10 @@ public class Individual {
         this.fitness = fitness;
     }
 
+    public void setTempPopulationIndex(int index) {
+        this.tmp_population_index = index;
+    }
+
     public void setGenotype(List<Double> genotype) {
         this.genotype = genotype;
     }
@@ -96,6 +101,10 @@ public class Individual {
 
     public void setNDeltas(List<Double> n_deltas) {
         this.n_deltas = n_deltas;
+    }
+
+    public void setNAlphas(double[] n_alphas) {
+        this.n_alphas = n_alphas;
     }
 
     public void setRankingProbabilityLinear(Double ranking_probability_linear) {
@@ -297,13 +306,11 @@ public class Individual {
         }
     }
 
-    private double keepInRange(double val) {
-        return Math.min(5.0, Math.max(
-                -5.0, val));
-    }
-
-    public double mutationDistance(Individual other) {
+    public double ourMutationDistance(Individual other) {
         int dimensions = 10;
+        this.calculateCovarianceMatrix2(dimensions);
+        other.calculateCovarianceMatrix2(dimensions);
+
         double[][] combinedVarianceArray = add2DArrays(this.covMatrix, other.covMatrix);
         RealMatrix combinedVariance = MatrixUtils.createRealMatrix(combinedVarianceArray);
         EigenDecomposition eigenDecomp = new EigenDecomposition(combinedVariance);
@@ -322,6 +329,7 @@ public class Individual {
         double distance = (normalizedDistance.transpose()).times(normalizedDistance).A[0][0];
         return distance;
     }
+
     public static double[][] add2DArrays(double[][] matrix1, double[][] matrix2) {
         double[][] addedMatrix = new double[matrix1.length][matrix1[0].length];
         for (int i = 0; i < matrix1.length; i++) {
@@ -338,6 +346,29 @@ public class Individual {
         }
         Matrix matrix = new Matrix(arrayMat);
         return matrix;
+    }
+
+    /*
+    private double keepInRange(double val) {
+        if (val < -5) {
+            return -5;
+        } else if (val > 5) {
+            return 5;
+        }
+        return val;
+    }
+    */
+
+    private double keepInRange(double val) {
+        while (val > 5 || val < -5) {
+            if (val > 5) {
+                val -= 10;
+            }
+            else if (val < -5) {
+                val += 10;
+            }
+        }
+        return val;
     }
 
     private double[][] multivariateNormalDistribution(int n, Random rnd_) {
