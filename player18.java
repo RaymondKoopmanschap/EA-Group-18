@@ -77,7 +77,6 @@ public class player18 implements ContestSubmission {
         double MUTATION_B = 2.1666;
         double MUTATION_EPSILON = 5.52773266332e-06;
         int MIGRATION_AFTER_EPOCHS = 150;
-        double RECOMB_PROBABILITY = 0.9733333;
 
         double BLEND_CROSSOVER_ALPHA = 0.5;
 
@@ -112,13 +111,6 @@ public class player18 implements ContestSubmission {
                 setPopulationTemporaryIndexes(population);
                 while (children.size() < CHILDREN_SIZE) {
                     double dice_roll = rnd_.nextDouble();
-                    /*
-                    if (dice_roll > RECOMB_PROBABILITY) {
-                        children.add(parents.get(rnd_.nextInt(parents.size())));
-                        children.add(parents.get(rnd_.nextInt(parents.size())));
-                        continue;
-                    }
-                    */
                 
                     List <Individual> two_parents = new ArrayList<Individual>();
                     List <Individual> two_children = new ArrayList<Individual>();

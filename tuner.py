@@ -20,8 +20,6 @@ def main(schaffers=False, katsuura=False):
             ('CHILDREN_SIZE', np.linspace(100, 800, 1, dtype='int')),
             ('ARITHMETIC_XOVER_N_PARENTS', np.linspace(2, 8, 1, dtype='int')),
             ('MUTATION_PROBABILITY', np.linspace(0.083333, 0.96, 1)),
-            ('RECOMB_PROBABILITY', np.linspace(0.9733333, 0.86, 1)),
-            ('N_SURVIVORS', np.linspace(30, 100, 1, dtype='int')),
             ('TOURNAMENT_SIZE', np.linspace(6, 10, 1, dtype='int')),
             ('ARITHMETIC_RECOMB_ALPHA', np.linspace(0.11, 0.42, 1)),
             ('MUTATION_A', np.linspace(2.3888, 2.5, 1)),
@@ -38,8 +36,6 @@ def main(schaffers=False, katsuura=False):
             ('CHILDREN_SIZE', np.linspace(40, 100, 1, dtype='int')),
             ('ARITHMETIC_XOVER_N_PARENTS', np.linspace(2, 8, 1, dtype='int')),
             ('MUTATION_PROBABILITY', np.linspace(0.98, 0.56, 1)),
-            ('RECOMB_PROBABILITY', np.linspace(0.853333, 0.86, 1)),
-            ('N_SURVIVORS', np.linspace(100, 100, 1, dtype='int')),
             ('TOURNAMENT_SIZE', np.linspace(3, 10, 1, dtype='int')),
             ('ARITHMETIC_RECOMB_ALPHA', np.linspace(0.11, 0.42, 1)),
             ('MUTATION_A', np.linspace(2.388888, 2.5, 1)),
@@ -56,29 +52,25 @@ def main(schaffers=False, katsuura=False):
         spamwriter = csv.writer(outfile, delimiter=';')
         spamwriter.writerow(fieldnames)
 
-    for RECOMB_PROBABILITY in parameters_dict['RECOMB_PROBABILITY']:
-        for BLEND_CROSSOVER_ALPHA in parameters_dict['BLEND_CROSSOVER_ALPHA']:
-            for ELITISM_TO_KEEP in parameters_dict['ELITISM_TO_KEEP']:
-                for MIGRATION_AFTER_EPOCHS in parameters_dict['MIGRATION_AFTER_EPOCHS']:
-                    for ISLANDS_NUMBER in parameters_dict['ISLANDS_NUMBER']:
-                        for MUTATION_EPSILON in parameters_dict['MUTATION_EPSILON']:
-                            for MUTATION_A in parameters_dict['MUTATION_A']:
-                                for MUTATION_B in parameters_dict['MUTATION_B']:
-                                    for ARITHMETIC_RECOMB_ALPHA in parameters_dict['ARITHMETIC_RECOMB_ALPHA']:
-                                        for TOURNAMENT_SIZE in parameters_dict['TOURNAMENT_SIZE']:
-                                            for CHILDREN_SIZE in parameters_dict['CHILDREN_SIZE']:
-                                                for POPULATION_SIZE in parameters_dict['POPULATION_SIZE']:
-                                                    for ARITHMETIC_XOVER_N_PARENTS in parameters_dict['ARITHMETIC_XOVER_N_PARENTS']:
-                                                        for MUTATION_PROBABILITY in parameters_dict['MUTATION_PROBABILITY']:
-                                                            for N_SURVIVORS in parameters_dict['N_SURVIVORS']:
-                                                                parameters = OrderedDict()
-                                                                for key in parameters_dict.keys():
-                                                                    parameters[key] = locals()[key]
-                                                                    if N_SURVIVORS > POPULATION_SIZE:
-                                                                        continue
-                                                                edit_java_file(parameters)
-                                                                compile_and_run_5_times(
-                                                                    parameters, schaffers=schaffers, katsuura=katsuura)
+    for BLEND_CROSSOVER_ALPHA in parameters_dict['BLEND_CROSSOVER_ALPHA']:
+        for ELITISM_TO_KEEP in parameters_dict['ELITISM_TO_KEEP']:
+            for MIGRATION_AFTER_EPOCHS in parameters_dict['MIGRATION_AFTER_EPOCHS']:
+                for ISLANDS_NUMBER in parameters_dict['ISLANDS_NUMBER']:
+                    for MUTATION_EPSILON in parameters_dict['MUTATION_EPSILON']:
+                        for MUTATION_A in parameters_dict['MUTATION_A']:
+                            for MUTATION_B in parameters_dict['MUTATION_B']:
+                                for ARITHMETIC_RECOMB_ALPHA in parameters_dict['ARITHMETIC_RECOMB_ALPHA']:
+                                    for TOURNAMENT_SIZE in parameters_dict['TOURNAMENT_SIZE']:
+                                        for CHILDREN_SIZE in parameters_dict['CHILDREN_SIZE']:
+                                            for POPULATION_SIZE in parameters_dict['POPULATION_SIZE']:
+                                                for ARITHMETIC_XOVER_N_PARENTS in parameters_dict['ARITHMETIC_XOVER_N_PARENTS']:
+                                                    for MUTATION_PROBABILITY in parameters_dict['MUTATION_PROBABILITY']:
+                                                        parameters = OrderedDict()
+                                                        for key in parameters_dict.keys():
+                                                            parameters[key] = locals()[key]
+                                                        edit_java_file(parameters)
+                                                        compile_and_run_5_times(
+                                                            parameters, schaffers=schaffers, katsuura=katsuura)
 
 
 def edit_java_file(parameters):

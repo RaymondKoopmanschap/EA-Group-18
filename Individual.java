@@ -310,11 +310,6 @@ public class Individual {
     public double ourMutationDistance(Individual other) {
         int dimensions = 10;
 
-        // this is done in previous step
-        //this.calculateCovarianceMatrix2(dimensions);
-        //
-        //other.calculateCovarianceMatrix2(dimensions);
-
         double[][] combinedVarianceArray = add2DArrays(this.covMatrix, other.covMatrix);
         RealMatrix combinedVariance = MatrixUtils.createRealMatrix(combinedVarianceArray);
         EigenDecomposition eigenDecomp = new EigenDecomposition(combinedVariance);
