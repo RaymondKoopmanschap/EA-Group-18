@@ -92,9 +92,6 @@ public class player18 implements ContestSubmission {
             epochs += 1;
 
             //TOURNAMENT_SIZE = Math.min(80, 130 - (int) (100* (1-0.95 * evals/evaluations_limit_)));
-            if (evals > evaluations_limit_) {
-                ELITISM_TO_KEEP = 1;
-            }
 
             for (int island = 0; island < ISLANDS_NUMBER; island++) {
                 population = islands.get(island).population;
@@ -143,10 +140,9 @@ public class player18 implements ContestSubmission {
                     two_children = BlendCrossover(two_parents, BLEND_CROSSOVER_ALPHA);
 
                     for (int i = 0; i < two_children.size(); i++) {
-                        dice_roll = rnd_.nextDouble();
                         two_children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        //two_children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
-
                     children.addAll(Crowding(two_parents, two_children));
                     //children.addAll(two_children);
                 }
