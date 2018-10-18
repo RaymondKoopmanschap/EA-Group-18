@@ -510,8 +510,8 @@ public class player18 implements ContestSubmission {
         double distance12;
         double distance21;
         double distance22;
-        if (true) {
-            //euclidean
+        if (false) {
+            //euclidean distance
             distance11 = euclideanDistance(parent_1.getGenotypeArray(), child_1.getGenotypeArray());
             distance12 = euclideanDistance(parent_1.getGenotypeArray(), child_2.getGenotypeArray());
             distance21 = euclideanDistance(parent_2.getGenotypeArray(), child_1.getGenotypeArray());

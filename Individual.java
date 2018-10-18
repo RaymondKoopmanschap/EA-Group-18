@@ -60,6 +60,7 @@ public class Individual {
         int dimensions = 10;
         int nAlpha = dimensions * (dimensions - 1) / 2;
         this.n_alphas = new double[nAlpha];
+        calculateLMatrix(dimensions);
     }
 
     public Individual(Random rnd, ContestEvaluation evaluation) {
