@@ -308,8 +308,11 @@ public class Individual {
 
     public double ourMutationDistance(Individual other) {
         int dimensions = 10;
-        this.calculateCovarianceMatrix2(dimensions);
-        other.calculateCovarianceMatrix2(dimensions);
+
+        // this is done in previous step
+        //this.calculateCovarianceMatrix2(dimensions);
+        //
+        //other.calculateCovarianceMatrix2(dimensions);
 
         double[][] combinedVarianceArray = add2DArrays(this.covMatrix, other.covMatrix);
         RealMatrix combinedVariance = MatrixUtils.createRealMatrix(combinedVarianceArray);
