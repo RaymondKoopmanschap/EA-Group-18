@@ -67,22 +67,21 @@ public class player18 implements ContestSubmission {
     }
 
     public void run() {
-        int POPULATION_SIZE = POPULATION_SIZE_TUNERXXX;
-        int CHILDREN_SIZE = CHILDREN_SIZE_TUNERXXX;
-        int ARITHMETIC_XOVER_N_PARENTS = ARITHMETIC_XOVER_N_PARENTS_TUNERXXX;
-        double MUTATION_PROBABILITY = MUTATION_PROBABILITY_TUNERXXX;
-        int TOURNAMENT_SIZE = TOURNAMENT_SIZE_TUNERXXX;
-        double ARITHMETIC_RECOMB_ALPHA = ARITHMETIC_RECOMB_ALPHA_TUNERXXX;
-        double MUTATION_A = MUTATION_A_TUNERXXX;
-        double MUTATION_B = MUTATION_B_TUNERXXX;
-        double MUTATION_EPSILON = MUTATION_EPSILON_TUNERXXX;
-        int MIGRATION_AFTER_EPOCHS = MIGRATION_AFTER_EPOCHS_TUNERXXX;
-        double RECOMB_PROBABILITY = RECOMB_PROBABILITY_TUNERXXX;
+        //int CHILDREN_SIZE = CHILDREN_SIZE_TUNERXXX;
+        //int ARITHMETIC_XOVER_N_PARENTS = ARITHMETIC_XOVER_N_PARENTS_TUNERXXX;
+        //double MUTATION_PROBABILITY = MUTATION_PROBABILITY_TUNERXXX;
+        //double ARITHMETIC_RECOMB_ALPHA = ARITHMETIC_RECOMB_ALPHA_TUNERXXX;
+        //double MUTATION_A = MUTATION_A_TUNERXXX;
+        //double MUTATION_B = MUTATION_B_TUNERXXX;
+        //double MUTATION_EPSILON = MUTATION_EPSILON_TUNERXXX;
 
+        int POPULATION_SIZE = POPULATION_SIZE_TUNERXXX;
         double BLEND_CROSSOVER_ALPHA = BLEND_CROSSOVER_ALPHA_TUNERXXX;
+        //int MIGRATION_AFTER_EPOCHS = MIGRATION_AFTER_EPOCHS_TUNERXXX;
 
         int ISLANDS_NUMBER = ISLANDS_NUMBER_TUNERXXX;
-        int ELITISM_TO_KEEP = ELITISM_TO_KEEP_TUNERXXX;
+        int TOURNAMENT_SIZE = TOURNAMENT_SIZE_TUNERXXX;
+        //int ELITISM_TO_KEEP = ELITISM_TO_KEEP_TUNERXXX;
 
         List<Island> islands = InitializeIslands(ISLANDS_NUMBER, POPULATION_SIZE);
 
@@ -100,25 +99,20 @@ public class player18 implements ContestSubmission {
                 sortPopulation(population);
 
                 List<Individual> elite = new ArrayList<Individual>();
+                /*
                 for (int j = 0; j < ELITISM_TO_KEEP; j++) {
                     Individual one_elite = new Individual(rnd_, evaluation_, population.get(j).genotype);
                     one_elite.setNDeltas(population.get(j).n_deltas);
                     one_elite.setFitness(population.get(j).fitness);
                     elite.add(one_elite);
                 }
+                */
 
                 // produce children
                 List <Individual> children = new ArrayList<Individual>();
                 setPopulationTemporaryIndexes(population);
-                while (children.size() < CHILDREN_SIZE) {
+                while (children.size() < POPULATION_SIZE) {
                     double dice_roll = rnd_.nextDouble();
-                    /*
-                    if (dice_roll > RECOMB_PROBABILITY) {
-                        children.add(parents.get(rnd_.nextInt(parents.size())));
-                        children.add(parents.get(rnd_.nextInt(parents.size())));
-                        continue;
-                    }
-                    */
                 
                     List <Individual> two_parents = new ArrayList<Individual>();
                     List <Individual> two_children = new ArrayList<Individual>();
@@ -141,7 +135,7 @@ public class player18 implements ContestSubmission {
                     two_children = BlendCrossover(two_parents, BLEND_CROSSOVER_ALPHA);
 
                     for (int i = 0; i < two_children.size(); i++) {
-                        two_children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        two_children.get(i).CorrelatedMutation2();
                         //two_children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                     children.addAll(Crowding(two_parents, two_children));
@@ -510,8 +504,8 @@ public class player18 implements ContestSubmission {
         double distance12;
         double distance21;
         double distance22;
-        if (true) {
-            //euclidean
+        if (false) {
+            //euclidean distance
             distance11 = euclideanDistance(parent_1.getGenotypeArray(), child_1.getGenotypeArray());
             distance12 = euclideanDistance(parent_1.getGenotypeArray(), child_2.getGenotypeArray());
             distance21 = euclideanDistance(parent_2.getGenotypeArray(), child_1.getGenotypeArray());

@@ -67,21 +67,21 @@ public class player18 implements ContestSubmission {
     }
 
     public void run() {
-        int POPULATION_SIZE = 100;
-        int CHILDREN_SIZE = 100;
-        int ARITHMETIC_XOVER_N_PARENTS = 2;
-        double MUTATION_PROBABILITY = 0.083333;
-        int TOURNAMENT_SIZE = 6;
-        double ARITHMETIC_RECOMB_ALPHA = 0.11;
-        double MUTATION_A = 2.3888;
-        double MUTATION_B = 2.1666;
-        double MUTATION_EPSILON = 5.52773266332e-06;
-        int MIGRATION_AFTER_EPOCHS = 150;
+        //int CHILDREN_SIZE = CHILDREN_SIZE_TUNERXXX;
+        //int ARITHMETIC_XOVER_N_PARENTS = ARITHMETIC_XOVER_N_PARENTS_TUNERXXX;
+        //double MUTATION_PROBABILITY = MUTATION_PROBABILITY_TUNERXXX;
+        //double ARITHMETIC_RECOMB_ALPHA = ARITHMETIC_RECOMB_ALPHA_TUNERXXX;
+        //double MUTATION_A = MUTATION_A_TUNERXXX;
+        //double MUTATION_B = MUTATION_B_TUNERXXX;
+        //double MUTATION_EPSILON = MUTATION_EPSILON_TUNERXXX;
 
-        double BLEND_CROSSOVER_ALPHA = 0.5;
+        int POPULATION_SIZE = 388;
+        double BLEND_CROSSOVER_ALPHA = 0.5926409106271656;
+        //int MIGRATION_AFTER_EPOCHS = MIGRATION_AFTER_EPOCHS_TUNERXXX;
 
-        int ISLANDS_NUMBER = 10;
-        int ELITISM_TO_KEEP = 1;
+        int ISLANDS_NUMBER = 8;
+        int TOURNAMENT_SIZE = 10;
+        //int ELITISM_TO_KEEP = ELITISM_TO_KEEP_TUNERXXX;
 
         List<Island> islands = InitializeIslands(ISLANDS_NUMBER, POPULATION_SIZE);
 
@@ -99,17 +99,19 @@ public class player18 implements ContestSubmission {
                 sortPopulation(population);
 
                 List<Individual> elite = new ArrayList<Individual>();
+                /*
                 for (int j = 0; j < ELITISM_TO_KEEP; j++) {
                     Individual one_elite = new Individual(rnd_, evaluation_, population.get(j).genotype);
                     one_elite.setNDeltas(population.get(j).n_deltas);
                     one_elite.setFitness(population.get(j).fitness);
                     elite.add(one_elite);
                 }
+                */
 
                 // produce children
                 List <Individual> children = new ArrayList<Individual>();
                 setPopulationTemporaryIndexes(population);
-                while (children.size() < CHILDREN_SIZE) {
+                while (children.size() < POPULATION_SIZE) {
                     double dice_roll = rnd_.nextDouble();
                 
                     List <Individual> two_parents = new ArrayList<Individual>();
@@ -133,7 +135,7 @@ public class player18 implements ContestSubmission {
                     two_children = BlendCrossover(two_parents, BLEND_CROSSOVER_ALPHA);
 
                     for (int i = 0; i < two_children.size(); i++) {
-                        two_children.get(i).CorrelatedMutation2(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
+                        two_children.get(i).CorrelatedMutation2();
                         //two_children.get(i).UncorrelatedMutationNStepSizes(MUTATION_EPSILON, MUTATION_A, MUTATION_B);
                     }
                     children.addAll(Crowding(two_parents, two_children));

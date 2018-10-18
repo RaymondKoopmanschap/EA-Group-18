@@ -253,12 +253,11 @@ public class Individual {
         }
         */
     }
-    public void CorrelatedMutation2(double epsilon, double first_arg, double second_arg) {
+    public void CorrelatedMutation2() {
         this.fitness = null;
-        //Benjamin mutation do not use
         int dimensions = 10;
-        double tau =  1  / (Math.sqrt(first_arg * Math.sqrt(dimensions)));
-        double tau_prime =  1 / (Math.sqrt(second_arg * dimensions));
+        double tau =  1  / (Math.sqrt(2 * Math.sqrt(dimensions)));
+        double tau_prime =  1 / (Math.sqrt(2 * dimensions));
 
         double beta = 0.0873; // 5 degrees
 
