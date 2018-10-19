@@ -190,11 +190,13 @@ public class player18 implements ContestSubmission {
                 }
 
                 //System.out.println(islands.get(island).last_recorded_fitness_changed + " " + islands.get(island).generations_without_fitness_change);
+                /*
                 if (epochs % 15 == 0) {
                     System.out.println(islands.get(island).population.get(0).genotype + " 0 " + islands.get(island).population.get(0).fitness);
                     System.out.println(islands.get(island).population.get(99).genotype + " 0 " + islands.get(island).population.get(99).fitness);
                     populationStatistics(islands.get(island).population);
                 }
+                */
                 //System.out.println(islands.get(island).population.get(0).fitness);
                 //System.out.println(islands.get(island).population.get(1).genotype.get(0) + " 1 " + island);
                 //System.out.println(islands.get(island).population.get(2).genotype.get(0) + " 3 " + island);
@@ -210,7 +212,45 @@ public class player18 implements ContestSubmission {
                     //islands.set(island, InitializeRandomIsland(POPULATION_SIZE));
                 }
             }
+
+            islandStatistics(islands, epochs);
         }
+    }
+
+    void islandStatistics(List<Island> islands, int epochs) {
+        List<Individual> population = new ArrayList<Individual>();
+        List<Double> best_fitnesses = new ArrayList<Double>();
+        List<Double> mean_fitnesses = new ArrayList<Double>();
+        double sum_fitness_all_islands = 0;
+        double best_fitness_all_islands = 0;
+        int count_all = 0;
+        for (int island = 0; island < islands.size(); island++) {
+            population = islands.get(island).population;
+            double sum_fitnesses = 0;
+            double best_fitness = 0;
+            for (int j = 0; j < population.size(); j++) {
+                sum_fitnesses += population.get(j).fitness;
+                sum_fitness_all_islands += population.get(j).fitness;
+                if (population.get(j).fitness > best_fitness) {
+                    best_fitness = population.get(j).fitness;
+                }
+                if (population.get(j).fitness > best_fitness_all_islands) {
+                    best_fitness_all_islands = population.get(j).fitness;
+                }
+                count_all += 1;
+            }
+            best_fitnesses.add(best_fitness);
+            mean_fitnesses.add((double)sum_fitnesses / islands.get(island).population.size());
+            System.out.println(
+                    epochs + ";" +
+                    island +  ";" + best_fitness + ";" +
+                    (double)sum_fitnesses / islands.get(island).population.size());
+        }
+        System.out.println(
+                epochs + ";" +
+                "ALL" +  ";" + best_fitness_all_islands + ";" +
+                (double)sum_fitness_all_islands / count_all);
+        System.out.println();
     }
 
     void setPopulationTemporaryIndexes(List<Individual> population) {

@@ -516,93 +516,6 @@ public class Individual {
                 }
             }
         }
-		
-        for (int i = 0; i < dimensions - 1; i++) {
-            for (int j = i + 1; j < dimensions; j++) {
-				for (int k = 0; k < dimensions; k++) {
-					double temp = Math.cos(this.n_alphas[alphaIndex])*rotation_matrix[k][i] - Math.sin(this.n_alphas[alphaIndex])*rotation_matrix[k][j];
-					rotation_matrix[k][j] = Math.sin(this.n_alphas[alphaIndex])*rotation_matrix[k][i] + Math.cos(this.n_alphas[alphaIndex])*rotation_matrix[k][j];
-                	rotation_matrix[k][i] = temp;
-                }
-                alphaIndex++;
-				/*
-                 * USE TO DISPLAY ROTATIONAL MATRICES
-                for (int k = 0; k < 10; k++) {
-                    //System.out.println(Arrays.toString(this.covMatrix[i]));
-                    for (int l = 0; l < 10; l++) {
-                        System.out.printf( "   " +  "%+.4f", rotationalMatrixx.A[k][l]);
-                    }
-                    System.out.println();
-                }
-                System.out.println("NEW MATRIX______________");
-                 */
-                /*
-                */
-            }
-        }
-		Matrix rotationalMatrixx = new Matrix(rotation_matrix);
-                
-		double[][] deltas_matrix = new double[dimensions][dimensions];
-        for (int i = 0; i < dimensions; i++) {
-            deltas_matrix[i][i] = this.n_deltas.get(i); // by purpose not squared
-        }
-        Matrix deltasMatrix = new Matrix(deltas_matrix);
-        /*
-        System.out.println("DELTAAAAS");
-        for (int k = 0; k < 10; k++) {
-            //System.out.println(Arrays.toString(this.covMatrix[i]));
-            for (int l = 0; l < 10; l++) {
-                System.out.printf( "   " +  "%+.4f", deltasMatrix.A[k][l]);
-            }
-            System.out.println();
-        }
-        System.out.println();
-        */
-        Matrix covarianceMatrix = rotationalMatrixx.times(deltasMatrix).times(rotationalMatrixx.transpose());
-        Matrix LMatrix = rotationalMatrixx.times(deltasMatrix);
-        /*
-        System.out.println("ROTATIONAL MATRIX:");
-        for (int k = 0; k < 10; k++) {
-            //System.out.println(Arrays.toString(this.covMatrix[i]));
-            for (int l = 0; l < 10; l++) {
-                System.out.printf( "   " +  "%+.4f", rotationalMatrixx.A[k][l]);
-            }
-            System.out.println();
-        }
-        System.out.println();
-        */
-        Matrix covMatrix = LMatrix.times(LMatrix.transpose());
-
-        this.covMatrix = covarianceMatrix.A;
-        /*
-        System.out.println("COVARIANCE MATRIX:");
-        for (int k = 0; k < 10; k++) {
-            //System.out.println(Arrays.toString(this.covMatrix[i]));
-            for (int l = 0; l < 10; l++) {
-                System.out.printf( "   " +  "%+.4f", covMatrix[k][l]);
-            }
-            System.out.println();
-        }
-        System.out.println();
-        */
-        return LMatrix;
-    }
-
-
-    private Matrix calculateLMatrixOld(int dimensions) {
-        // index used to traverse the alphas array
-        int alphaIndex = 0;
-        // calculate values on the diagonal and above it
-        double[][] rotation_matrix = new double[dimensions][dimensions];
-        for (int i = 0; i < dimensions; i++) {
-            for (int j = 0; j < dimensions; j++) {
-                if (i==j) {
-                    rotation_matrix[i][j] = 1;
-                } else {
-                    rotation_matrix[i][j] = 0;
-                }
-            }
-        }
         Matrix rotationalMatrixx = new Matrix(rotation_matrix);
 
         for (int i = 0; i < dimensions - 1; i++) {
@@ -679,9 +592,6 @@ public class Individual {
         */
         return LMatrix;
     }
-
-
-
 
 
     /*

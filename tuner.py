@@ -28,14 +28,21 @@ def main(schaffers=False, katsuura=False):
         spamwriter = csv.writer(outfile, delimiter=';')
         spamwriter.writerow(fieldnames)
 
-    for i in range(0, 1000):
-        parameters = {}
-        parameters['ISLANDS_NUMBER'] = random.randint(1, 20)
-        parameters['BLEND_CROSSOVER_ALPHA'] = random.random()
-        parameters['TOURNAMENT_SIZE'] = random.randint(2, 40)
-        parameters['POPULATION_SIZE'] = random.randint(10, 1000)
-
-
+    parameters = {}
+    if False:
+        for i in range(0, 1000):
+            parameters['ISLANDS_NUMBER'] = random.randint(1, 20)
+            parameters['BLEND_CROSSOVER_ALPHA'] = random.random()
+            parameters['TOURNAMENT_SIZE'] = random.randint(2, 40)
+            parameters['POPULATION_SIZE'] = random.randint(10, 1000)
+            edit_java_file(parameters)
+            compile_and_run_5_times(
+                parameters, schaffers=schaffers, katsuura=katsuura)
+    else:
+        parameters['ISLANDS_NUMBER'] = 5
+        parameters['BLEND_CROSSOVER_ALPHA'] = 0.49488
+        parameters['TOURNAMENT_SIZE'] = 18
+        parameters['POPULATION_SIZE'] = 998
         edit_java_file(parameters)
         compile_and_run_5_times(
             parameters, schaffers=schaffers, katsuura=katsuura)
