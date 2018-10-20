@@ -75,12 +75,12 @@ public class player18 implements ContestSubmission {
         //double MUTATION_B = MUTATION_B_TUNERXXX;
         //double MUTATION_EPSILON = MUTATION_EPSILON_TUNERXXX;
 
-        int POPULATION_SIZE = 998;
-        double BLEND_CROSSOVER_ALPHA = 0.49488;
+        int POPULATION_SIZE = 682;
+        double BLEND_CROSSOVER_ALPHA = 0.3521577;
         //int MIGRATION_AFTER_EPOCHS = MIGRATION_AFTER_EPOCHS_TUNERXXX;
 
-        int ISLANDS_NUMBER = 5;
-        int TOURNAMENT_SIZE = 18;
+        int ISLANDS_NUMBER = 10;
+        int TOURNAMENT_SIZE = 30;
         //int ELITISM_TO_KEEP = ELITISM_TO_KEEP_TUNERXXX;
 
         List<Island> islands = InitializeIslands(ISLANDS_NUMBER, POPULATION_SIZE);

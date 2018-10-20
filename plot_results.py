@@ -4,7 +4,10 @@ import numpy as np
 run = 0
 
 for method, filename in (('euclidean', 'results_euclidean_distance_19-10-2018-17-00.csv'),
-                         ('our_mutation_distance', 'results_our_distance19-10-2018-17-00.csv')):
+                         ('our_mutation_distance', 'results_our_distance19-10-2018-17-00.csv'),
+                         ('our_mutation_distance_optE_', 'results_our_distanceNIGHT19-10-2018-21-00.csv'),
+                         ('euclidean_optE_', 'results_euclidean_distanceNIGHT19-10-2018-21-00.csv'),
+                         ):
 
     with open(filename, "r") as f:
         test_number = 0
