@@ -1,6 +1,5 @@
 import os
 import csv
-import numpy as np
 import subprocess
 from collections import OrderedDict
 
